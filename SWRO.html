@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SWRO Calculator</title>
+<style>
+:root{--bg:#f3eee4;--card:#fbf8f1;--card2:#ece5d6;--line:#d8cfba;--tx:#2b2a26;--mut:#6f6a5c;--am:#b4532a;--onacc:#fff8ee;--ok:#2f7d5b;--bad:#b3372f;--bar2:#3e7c82;--sw:#3e7c82;--brine:#8b6b3d;--sh:0 1px 2px rgba(60,45,20,.08)}
+html[data-th=sea]{--bg:#e6efed;--card:#f5faf9;--card2:#d9e7e4;--line:#b9d1cc;--tx:#1d2d2b;--mut:#587270;--am:#0f766e;--onacc:#f2fffd;--ok:#2f7d4f;--bad:#b4472f;--bar2:#c2703a;--sw:#3b7fa6;--brine:#8a6a3a}
+html[data-th=dark]{--bg:#1d1b18;--card:#27241f;--card2:#322e27;--line:#443d33;--tx:#eee8da;--mut:#a39b88;--am:#e0894f;--onacc:#201409;--ok:#74c398;--bad:#e5786e;--bar2:#6aa8ad;--sw:#6aa8ad;--brine:#c9a063;--sh:none}
+body{transition:background .3s,color .3s}
+.card,.s,.k,.tab,input,select{transition:background .3s,border-color .3s}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:1400px;margin:auto;padding-bottom:40px}
+.top{position:sticky;top:0;z-index:20;background:linear-gradient(var(--bg) 92%,transparent);backdrop-filter:blur(4px);padding:12px 14px 6px}
+.brand{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.brand h1{font-size:17px;color:var(--am)}
+.brand span{font-size:12px;color:var(--mut)}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.s{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--line);border-radius:12px;padding:8px 10px;text-align:center;box-shadow:var(--sh)}
+.s.g{border-top-color:var(--ok)}.s.g b{color:var(--ok)}
+.s.m{border-top-color:var(--am)}.s.m b{color:var(--am)}
+.s.r{border-top-color:var(--bad)}.s.r b{color:var(--bad)}
+.s.n b{color:var(--tx)}
+.s small{display:block;color:var(--mut);font-size:11px}
+.s b{font-size:17px}
+.s i{font-style:normal;font-size:11px;color:var(--mut)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1 0 auto;min-width:112px;background:var(--card);border:1px solid var(--line);color:var(--mut);border-radius:12px;padding:8px 10px;text-align:left;cursor:pointer;font:inherit}
+.tab b{display:block;font-size:13px;color:var(--tx)}
+.tab small{font-size:11px}
+.tab.on{background:var(--am);border-color:var(--am)}
+.tab.on b,.tab.on small{color:var(--onacc)}
+.panel{display:none;padding:12px 14px}
+.panel.on{display:block}
+.lead{color:var(--mut);margin:6px 0 12px;font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--sh)}
+.card h2{font-size:14px;color:var(--am);margin-bottom:2px}
+.card .why{font-size:12px;color:var(--mut);margin-bottom:12px}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:13px;font-weight:600}
+.fld .h{font-size:12px;color:var(--mut);margin-bottom:5px}
+.row{display:flex;gap:8px;align-items:center}
+input,select{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit}
+input:focus,select:focus{outline:2px solid var(--am);border-color:var(--am)}
+input:disabled{opacity:.5}
+.u{min-width:62px;color:var(--mut);font-size:12px}
+.btn{background:var(--card2);color:var(--tx);border:1px solid var(--am);border-radius:10px;padding:10px 14px;font:inherit;cursor:pointer;width:100%}
+.btn.p{background:var(--am);color:var(--onacc);font-weight:700;width:auto}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+.desc{background:var(--card2);border-left:4px solid var(--am);border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+.desc b{color:var(--am)}
+.hide{display:none}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.k{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.k span{font-size:11px;color:var(--mut);display:block}
+.k b{font-size:19px;color:var(--am)}
+.k small{font-size:11px;color:var(--mut)}
+.al{padding:10px 12px;border-radius:10px;margin-bottom:8px;font-size:13px;border:1px solid var(--bad);color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.al.g{border-color:var(--ok);color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+th{color:var(--am)}
+tr.sel td{background:color-mix(in srgb,var(--am) 16%,transparent)}
+.wrap{overflow-x:auto}
+.bl{margin-bottom:12px}
+.bl div{display:flex;justify-content:space-between;font-size:13px;gap:8px}
+.bar{height:12px;background:var(--bg);border-radius:6px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--am);border-radius:6px;transition:width .4s ease}
+.bar.o i{background:var(--bar2)}
+footer{text-align:center;color:var(--mut);font-size:11px;margin-top:22px}
+input[type=checkbox]{width:auto;accent-color:var(--am)}
+.chips{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.chips label{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
+.pp{fill:none;stroke-width:7;stroke-linecap:round;opacity:.3}
+.fl{fill:none;stroke-width:3;stroke-linecap:round;stroke-dasharray:2 14;animation:dash 1s linear infinite}
+.fl.off{animation:none;opacity:0}
+@keyframes dash{to{stroke-dashoffset:-16}}
+.cw{stroke:var(--sw)}.ch{stroke:var(--am)}.cb{stroke:var(--brine)}.cp{stroke:var(--ok)}
+.sh{fill:none;stroke:var(--mut);stroke-width:2;stroke-dasharray:6 5}
+.nd{cursor:pointer}
+.nd .bx{fill:var(--card2);stroke:var(--line);stroke-width:2;transition:stroke .2s}
+.nd:hover .bx{stroke:var(--am)}
+.nd.sel .bx{stroke:var(--am);stroke-width:4}
+.nd text{fill:var(--tx);font:600 13px system-ui,sans-serif;text-anchor:middle;pointer-events:none}
+.nd text.s2{font-weight:400;font-size:11px;fill:var(--mut)}
+.lb{fill:var(--tx);font:11px system-ui,sans-serif;paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}
+.lg{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--mut);margin-top:8px}
+.lg i{display:inline-block;width:22px;height:4px;border-radius:2px;vertical-align:middle;margin-inline-end:5px}
+.gd{border-bottom:1px solid var(--line);padding:8px 0}
+.gd summary{cursor:pointer;font-weight:600;color:var(--am)}
+.gd p,.gd li{font-size:13px;margin:6px 0}
+.gd ul{padding-inline-start:20px}
+.gd code{direction:ltr;unicode-bidi:embed;background:var(--card2);padding:1px 6px;border-radius:6px;font-size:12px}
+.en{unicode-bidi:isolate;direction:ltr}
+.fm{direction:ltr;text-align:left;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;background:var(--card2);border-radius:8px;padding:9px 12px;margin:6px 0;overflow-x:auto;white-space:nowrap}
+.gbox{font-size:15px}
+#gg{line-height:1.9}
+#gg summary{font-size:15.5px;padding:4px 0}
+.gd p,.gd li{font-size:14.5px;line-height:1.95}
+.gd li{margin:8px 0}
+.xin{text-align:left}
+#rep{display:none;color:#1b2b4a;font:13px/1.5 Arial,Helvetica,sans-serif}
+#rep.show{display:block;position:fixed;inset:0;z-index:100;background:#e6f1f7;overflow:auto}
+#rep .tb{position:sticky;top:0;z-index:5;display:flex;gap:8px;justify-content:center;padding:10px;background:#0b6e99}
+#rep .tb button{border:0;border-radius:8px;padding:9px 16px;font:600 13px Arial;cursor:pointer;background:#f5a623;color:#0b6e99}
+#rep .tb button.g{background:#fff}
+#rep .pg{max-width:1000px;margin:12px auto;background:#fff;padding:0 0 14px;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+#rep .hd{background:#0b6e99;color:#fff;padding:18px 14px;border-bottom:5px solid #f5a623;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+#rep .hd h1{font-size:22px;letter-spacing:.3px}
+#rep .hd span{font-size:11px;color:#f5a623;font-weight:700;text-align:right}
+#rep .in{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid #cde3ee}
+#rep .in div{padding:9px 14px;border-right:1px solid #cde3ee}
+#rep .in div:last-child{border-right:0}
+#rep .in small{display:block;color:#5b6b8c;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em}
+#rep .in b{font-size:13px}
+#rep .bd{padding:10px 12px}
+#rep h2{font-size:13px;color:#0b6e99;text-transform:uppercase;letter-spacing:.08em;border-bottom:2px solid #f5a623;padding-bottom:3px;margin:14px 0 8px}
+#rep .ks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+#rep .rk{border:1px solid #cde3ee;border-left:5px solid #0b6e99;border-radius:6px;padding:9px 11px;background:#f2f9fd;break-inside:avoid}
+#rep .rk span{display:block;font-size:9.5px;color:#5b6b8c;text-transform:uppercase}
+#rep .rk b{font-size:19px;color:#0b6e99}
+#rep .rk small{font-size:10px;color:#5b6b8c;font-weight:400}
+#rep table{width:100%;border-collapse:collapse;font-size:12px}
+#rep th{background:#0b6e99;color:#fff;padding:6px 8px;text-align:center;vertical-align:middle;font-weight:600;white-space:normal}
+#rep td{padding:3.5px 8px;border-bottom:1px solid #dcecf4;text-align:center;vertical-align:middle;white-space:normal}
+#rep tr:nth-child(even) td{background:#eef7fc}
+#rep td.n,#rep th.n{text-align:center}
+#rep tr.tt th{background:#fff;color:#0b6e99;font-size:13px;text-transform:uppercase;letter-spacing:.08em;border-bottom:2px solid #f5a623;padding:10px 0 5px;text-align:left}
+#rep .g2 tr.tt th{padding-top:0}
+#rep tr.sel td{background:#fff1d6;font-weight:700}
+#rep .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+#rep .sv{border:1px solid #cde3ee;border-radius:8px;padding:4px;break-inside:avoid}
+#rep .sv svg{width:100%;height:auto;display:block}
+#rep .rb{height:8px;background:#dcecf4;border-radius:4px;overflow:hidden}
+#rep .rb i{display:block;height:100%}
+#rep .al{border-radius:6px;padding:7px 10px;margin-bottom:5px;font-size:12px;border:1px solid}
+#rep .al.ok{background:#e4f6ec;border-color:#2f9e6b;color:#17623f}
+#rep .al.no{background:#fde8e6;border-color:#c0392b;color:#8e2418}
+#rep .ft{margin:14px 12px 0;padding-top:8px;border-top:2px solid #0b6e99;display:flex;justify-content:space-between;font-size:10px;color:#5b6b8c;gap:10px}
+#rep .ft b{color:#0b6e99}
+@media print{
+body>*:not(#rep){display:none!important}
+#rep.show{position:static;background:#fff;overflow:visible}
+#rep .tb{display:none}
+#rep .pg{max-width:none;margin:0;box-shadow:none}
+@page{size:A4;margin:6mm}
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#rep h2{break-after:avoid}
+#rep .sc,#rep .sv,#rep .rk,#rep .ts,#rep .g2{break-inside:avoid}
+#rep tr{break-inside:avoid}
+#rep thead{display:table-header-group}
+#rep tbody tr:first-child{break-before:avoid}
+html,body{background:#fff!important}
+}
+.gmodal{display:none;position:fixed;inset:0;z-index:50;background:rgba(20,15,5,.5);padding:14px;overflow:auto}
+.gmodal.on{display:block}
+.gbox{max-width:720px;margin:16px auto;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px}
+.gr{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.gr>b{color:var(--am);word-break:break-word}
+@media(max-width:560px){.strip{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="top">
+<div class="brand"><h1>SWRO Hydraulic & Energy Calculator</h1><span style="display:flex;gap:8px;align-items:center"><button class="btn p" id="xbtn" style="padding:5px 10px;font-size:12px" onclick="xo()">Export</button><button class="btn" id="gbtn" style="width:auto;padding:5px 10px;font-size:12px" onclick="go5()">Glossary</button><select id="theme" style="width:auto;padding:5px 8px;font-size:12px"><option value="auto">Theme: Auto</option><option value="sand">Sand</option><option value="sea">Sea</option><option value="dark">Charcoal</option></select></span></div>
+<div class="strip" id="strip"></div>
+<div class="tabs" id="tabs"></div>
+</div>
+
+<div class="panel" id="p0"></div>
+<div class="panel" id="p1"></div>
+<div class="panel" id="pS"></div>
+<div class="panel" id="p2"></div>
+<div class="panel" id="p3"></div>
+<div class="panel" id="p4"></div>
+<div class="gmodal" id="p5"></div>
+<footer>Eng. Hesham Mohamed</footer>
+
+<script>
+const $=i=>document.getElementById(i);
+const NAMES={none:"No ERD",px:"Pressure Exchanger (PX)",turbo:"Turbocharger",pelton:"Pelton wheel"};
+const DESC={
+none:"<b>No ERD</b> — brine pressure is dumped. Highest energy; use only as a reference.",
+px:"<b>Pressure Exchanger</b> — works in parallel with the HPP. Brine at ~60 bar pushes seawater directly in a rotor (95–98% efficient). A small booster lifts that flow to membrane pressure. Best SEC.",
+turbo:"<b>Turbocharger</b> — installed <b>after the HPP and before the membranes</b>. A turbine on the brine line drives a pump on the same shaft that boosts the feed. Simple, no extra motor, ~60–70% overall.",
+pelton:"<b>Pelton wheel</b> — brine jets spin a wheel on the HPP/motor shaft, reducing motor load. 80–88% efficient, common in older or large plants."};
+const PRE={
+src:{med:[39000,25],red:[41000,28],gulf:[45000,32],std:[35000,25]},
+intake:{open:0.7,beach:0.5},
+pump:{std:[82,75,94],high:[86,80,96]},
+elem:{a400:37.2,a440:40.9,a365:33.9}
+};
+
+const T=[
+["Plant Data","Water, capacity, membranes"],
+["Equipment","ERD, pumps, cost"],
+["Schematic","Interactive diagram"],
+["Results","Energy & flows"],
+["Pressure Map","Where every bar goes"],
+["ERD Compare","PX vs Turbo vs Pelton"]
+];
+$("tabs").innerHTML=T.map((t,i)=>`<button class="tab" data-i="${i}"><b>${i+1}. ${t[0]}</b><small>${t[1]}</small></button>`).join("");
+
+function fld(o){
+ let inner;
+ if(o.type==="sel")inner=`<select id="${o.id}">${o.opts.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join("")}</select>`;
+ else inner=`<div class="row"><input id="${o.id}" type="number" step="${o.step}" value="${o.def}"><span class="u" id="${o.id}_u">${o.unit||""}</span></div>`;
+ return `<div class="fld ${o.cls||""}" ${o.for?`data-for="${o.for}"`:""}><label for="${o.id}">${o.label}</label><div class="h">${o.hint}</div>${inner}</div>`;
+}
+function card(t,w,fs,extra=""){return `<div class="card"><h2>${t}</h2><div class="why">${w}</div>${fs.map(fld).join("")}${extra}</div>`}
+function nav(b,n){return `<div class="nav">${b!=null?`<button class="btn" style="width:auto" onclick="go(${b})">← ${T[b][0]}</button>`:"<span></span>"}${n!=null?`<button class="btn p" onclick="go(${n})">${T[n][0]} →</button>`:""}</div>`}
+
+$("p0").innerHTML=`<div class="cards">`+
+card("Feed water","Salinity and temperature set the pressure needed.",[
+{id:"src",type:"sel",label:"Water source",hint:"Sets TDS and temperature",opts:[["med","Mediterranean (39,000 / 25°C)"],["red","Red Sea (41,000 / 28°C)"],["gulf","Arabian Gulf (45,000 / 32°C)"],["std","Standard seawater (35,000 / 25°C)"],["custom","Custom"]]},
+{id:"tds",label:"Feed TDS",unit:"mg/L",def:39000,step:500,hint:"Higher TDS → higher pressure and SEC"},
+{id:"temp",label:"Temperature",unit:"°C",def:25,step:0.5,hint:"Cold water needs more pressure"},
+{id:"intake",type:"sel",label:"Intake type",hint:"Sets intake + pretreatment energy",opts:[["open","Open sea intake"],["beach","Beach well / seabed gallery"],["custom","Custom"]]}
+])+
+card("Plant capacity","Sets all flows in the plant.",[
+{id:"unit",type:"sel",label:"Capacity unit",hint:"Input unit",opts:[["h","m³/h"],["d","m³/day"]]},
+{id:"cap",label:"Permeate capacity",unit:"m³/h",def:1000,step:10,hint:"Net product water"},
+{id:"rec",label:"Recovery",unit:"%",def:45,step:0.5,hint:"Permeate ÷ feed. Typical SWRO 40–50%"},
+{id:"rej",label:"Salt rejection",unit:"%",def:99.7,step:0.05,hint:"Membrane average"}
+])+
+card("Membranes","Sets flux and HPP pressure.",[
+{id:"elem",type:"sel",label:"Element size",hint:"8-inch element active area",opts:[["a400","400 ft² (37.2 m²)"],["a440","440 ft² (40.9 m²)"],["a365","365 ft² (33.9 m²)"]]},
+{id:"ne",label:"Elements per vessel",unit:"no.",def:8,step:1,hint:"Usually 7–8"},
+{id:"vmode",type:"sel",label:"Number of vessels",hint:"Auto from flux, or manual",opts:[["auto","Auto from design flux"],["man","Manual"]]},
+{id:"flux",label:"Design flux",unit:"LMH",def:14,step:0.5,hint:"SWRO typically 13–16 LMH",for:"auto"},
+{id:"nv",label:"Pressure vessels",unit:"no.",def:130,step:1,hint:"Count of vessels",for:"man"},
+{id:"pf",label:"Feed pressure at membranes",unit:"bar",def:62,step:0.5,hint:"Must exceed brine π"},
+{id:"dpm",label:"Membrane ΔP (feed→brine)",unit:"bar",def:3,step:0.1,hint:"Typically 2–4 bar"},
+{id:"pperm",label:"Permeate back pressure",unit:"bar",def:1,step:0.1,hint:"Usually 0.5–2 bar"}
+],`<button class="btn" onclick="autoPf()">Auto-set feed pressure (outlet NDP = 2 bar)</button>`)+
+`</div>`+nav(null,1);
+
+$("p1").innerHTML=`<div class="cards">`+
+`<div class="card"><h2>Energy recovery device</h2><div class="why">Recovers brine pressure to cut HPP energy.</div>`+
+fld({id:"erd",type:"sel",label:"ERD type",hint:"Changes the schematic and results",opts:[["px","Pressure Exchanger (PX)"],["turbo","Turbocharger"],["pelton","Pelton wheel"],["none","No ERD"]]})+
+`<div class="desc" id="desc"></div>`+
+[
+{id:"lube",label:"PX lube / leakage flow",unit:"% of brine",def:2,step:0.1,hint:"Typically 1–3%",for:"px"},
+{id:"mix",label:"PX mixing",unit:"%",def:3,step:0.1,hint:"Raises feed TDS, typically 1–3%",for:"px"},
+{id:"dpx",label:"PX high-pressure ΔP",unit:"bar",def:1,step:0.1,hint:"0.5–1.5 bar",for:"px"},
+{id:"et",label:"Turbine efficiency",unit:"%",def:82,step:0.5,hint:"Brine turbine",for:"turbo"},
+{id:"etp",label:"Turbo pump efficiency",unit:"%",def:80,step:0.5,hint:"Feed booster impeller",for:"turbo"},
+{id:"epl",label:"Pelton efficiency",unit:"%",def:85,step:0.5,hint:"Wheel + gearbox",for:"pelton"},
+{id:"pd",label:"Brine discharge pressure",unit:"bar",def:1,step:0.1,hint:"Back pressure after ERD",for:"turbo pelton"}
+].map(fld).join("")+`</div>`+
+card("Pumps & motors","Efficiencies set the electric power.",[
+{id:"pump",type:"sel",label:"Pump quality",hint:"Fills the three efficiencies below",opts:[["std","Standard"],["high","High efficiency"],["custom","Custom"]]},
+{id:"eh",label:"HPP efficiency",unit:"%",def:82,step:0.5,hint:"High-pressure pump"},
+{id:"eb",label:"Booster efficiency",unit:"%",def:75,step:0.5,hint:"PX circulation booster",for:"px"},
+{id:"em",label:"Motor efficiency",unit:"%",def:94,step:0.5,hint:"Includes VFD if used"},
+{id:"aux",label:"Intake + pre + post-treatment",unit:"kWh/m³",def:0.7,step:0.05,hint:"Everything outside the RO skid"}
+])+
+card("Economics","Annual energy cost.",[
+{id:"tar",label:"Electricity tariff",unit:"EGP/kWh",def:2.5,step:0.1,hint:"Your plant tariff"},
+{id:"av",label:"Plant availability",unit:"%",def:95,step:0.5,hint:"Operating hours share"}
+])+`</div>`+nav(0,2);
+
+$("p2").innerHTML=`<div class="kpis" id="kpis"></div><div id="alerts"></div><div class="cards"><div class="card"><h2>Flows & salinity</h2><div class="why">Mass balance across the skid.</div><div class="wrap"><table id="tFlow"></table></div></div><div class="card"><h2>Power breakdown</h2><div class="why">Where the electricity goes.</div><div id="bars"></div></div></div>`+nav(2,4);
+
+$("p3").innerHTML=`<div class="cards"><div class="card"><h2>Pressure profile</h2><div class="why">HPP to discharge.</div><div id="pmap"></div></div><div class="card"><h2>Osmotic & driving pressure</h2><div class="why">NDP at the outlet must stay positive.</div><div class="wrap"><table id="tOsm"></table></div></div></div>`+nav(3,5);
+
+$("p4").innerHTML=`<div class="cards"><div class="card" style="grid-column:1/-1"><h2>Energy comparison</h2><div class="why">Same plant, each ERD.</div><div class="wrap"><table id="tCmp"></table></div></div><div class="card" style="grid-column:1/-1"><h2>SEC – RO section</h2><div class="why">Lower is better.</div><div id="cbars"></div></div></div>`+nav(4,null);
+
+const GL=[
+["SWRO","Seawater Reverse Osmosis","تحلية مياه البحر بالتناضح العكسي: بنضغط مياه البحر على غشاء يمرّر الماء العذب ويمنع الأملاح."],
+["RO","Reverse Osmosis","التناضح العكسي. نفس الفكرة لكن ممكن تستخدم مع مياه أقل ملوحة."],
+["Intake","Water intake","المأخذ: المكان اللي بتسحب منه مياه البحر."],
+["Open intake","Open sea intake","مأخذ مفتوح: ماسورة سحب مباشرة من البحر. إنتاج كبير لكن المياه أقل نظافة."],
+["Beach well","Beach well / seabed gallery","بئر ساحلي: الرمل بيصفّي المياه طبيعياً فتطلع أنظف وبكيماويات أقل."],
+["Screens","Intake screens","شبك على فتحة السحب لمنع دخول الأسماك والأجسام الكبيرة."],
+["SDI","Silt Density Index","مؤشر بيقيس قدرة المياه على سد الأغشية. لازم يكون أقل من 3 قبل الأغشية."],
+["Pretreatment","Pretreatment","المعالجة الأولية: تنقية المياه قبل الأغشية لحمايتها."],
+["Chlorination","Chlorination","إضافة كلور لقتل الكائنات الحية ومنع النمو البيولوجي."],
+["SBS","Sodium Bisulfite","مادة بتشيل الكلور من المياه قبل الأغشية لأن الكلور بيتلفها."],
+["Coagulation","Coagulation","إضافة مادة (زي FeCl₃) بتخلي الشوائب الدقيقة تتجمع."],
+["FeCl₃","Ferric Chloride","كلوريد الحديديك: مادة تخثير شائعة."],
+["Flocculation","Flocculation","تحويل الشوائب المتجمعة لندف أكبر يسهل ترسيبها أو فلترتها."],
+["DAF","Dissolved Air Flotation","التعويم بالهواء المذاب: بيرفع الطحالب والزيوت لسطح المياه عشان تتشال."],
+["Media filter","Media filter","فلتر رمل وأنثراسيت بيشيل العكارة والشوائب."],
+["UF","Ultrafiltration","ترشيح فائق: أغشية دقيقة بتشيل الجسيمات والبكتيريا، بديل لفلاتر الرمل."],
+["Antiscalant","Antiscalant","مادة بتمنع ترسيب الأملاح (قشور) على الأغشية."],
+["Cartridge filter","Cartridge filter 5 µm","فلتر خرطوشة 5 ميكرون: آخر حماية قبل الـ HPP والأغشية."],
+["µm","Micrometer","ميكرون: واحد على مليون من المتر."],
+["HPP","High Pressure Pump","مضخة الضغط العالي: بترفع ضغط مياه البحر لـ 55–70 bar."],
+["Multistage centrifugal","Multistage centrifugal pump","نوع مضخة بتستخدم عدة مراحل (impellers) لرفع الضغط."],
+["Plunger pump","Positive displacement pump","مضخة مكبسية: كفاءة عالية ومناسبة للمحطات الصغيرة."],
+["VFD","Variable Frequency Drive","محول تردد: بيغير سرعة الموتور للتحكم في التدفق والضغط."],
+["ERD","Energy Recovery Device","جهاز استرجاع الطاقة: بياخد ضغط الـ brine ويرجّعه للتغذية بدل ما يضيع."],
+["PX","Pressure Exchanger","مبادل ضغط: الـ brine بيضغط مياه بحر جديدة مباشرة جوه rotor. كفاءة 95–98%."],
+["Rotor","Rotor","الجزء الدوّار جوه الـ PX وفيه قنوات بيتم فيها نقل الضغط."],
+["Turbocharger","Turbocharger","توربين على خط الـ brine ومضخة على نفس العمود بتزود ضغط التغذية."],
+["Pelton","Pelton wheel","عجلة يدوّرها نفاث الـ brine، متوصلة بعمود الـ HPP لتقليل حمل الموتور."],
+["Booster","Booster pump","مضخة صغيرة بتكمل ضغط مياه خارجة من الـ PX للوصول لضغط الأغشية."],
+["Common shaft","Common shaft","عمود واحد مشترك بين التوربين والمضخة (أو بين Pelton والـ HPP)."],
+["Element","Membrane element","عنصر غشاء قطره 8 بوصة. بيتركب أكتر من عنصر جوه الـ vessel."],
+["Vessel","Pressure vessel","أنبوب ضغط بيحتوي 7–8 عناصر غشاء."],
+["FRP","Fiberglass Reinforced Plastic","بلاستيك مقوى بالفايبر: خامة الـ vessels."],
+["TFC","Thin Film Composite","نوع شائع من أغشية الـ polyamide."],
+["Fouling","Fouling","اتساخ الغشاء بالشوائب والبكتيريا فيزيد الضغط المطلوب."],
+["Scaling","Scaling","ترسيب أملاح (قشور) على الغشاء لما الملوحة تعلى."],
+["Post-treatment","Post-treatment","المعالجة اللاحقة: تظبيط المياه المنتجة قبل التوزيع."],
+["Remineralization","Remineralization","إضافة معادن (كالسيوم وغيره) للمياه العذبة عشان متبقاش أكالة."],
+["LSI","Langelier Saturation Index","مؤشر بيقول المياه بتترسب (قشور) ولا بتأكل المواسير."],
+["pH","pH","درجة الحموضة أو القلوية للمياه."],
+["Second pass","Second pass RO","مرحلة تحلية ثانية لتقليل الأملاح أو البورون أكتر."],
+["Boron","Boron","عنصر صعب إزالته في تحلية مياه البحر وله حد أقصى في مياه الشرب."],
+["Brine","Concentrate","المياه المركزة الخارجة من الأغشية، ملوحتها حوالي ضعف مياه البحر."],
+["Permeate","Product water","المياه العذبة الخارجة من الأغشية."],
+["Outfall","Brine outfall","خط تصريف الـ brine للبحر."],
+["Diffuser","Diffuser","فتحات متعددة في نهاية خط التصريف لتخفيف الملوحة بسرعة."],
+["CIP","Clean In Place","غسيل كيماوي للأغشية بدون فكها (حمض وقلوي)."],
+["Flushing","Flushing","شطف الأغشية بمياه منتجة عند الإيقاف لمنع الترسيب."],
+["Dosing","Chemical dosing","حقن الكيماويات (antiscalant وSBS وحمض) في الأماكن المطلوبة."],
+["TDS","Total Dissolved Solids","إجمالي الأملاح الذائبة، بالـ mg/L. مياه البحر حوالي 35,000–45,000."],
+["SEC","Specific Energy Consumption","الطاقة المستهلكة لإنتاج 1 م³ ماء (kWh/m³). كل ما قلّ كان أحسن."],
+["NDP","Net Driving Pressure","صافي الضغط الدافع للماء عبر الغشاء بعد خصم الضغط الأسموزي والفواقد. لازم يكون موجب."],
+["π","Osmotic pressure","الضغط الأسموزي: ضغط المياه المالحة اللي بيشد الماء العذب ناحيتها. لازم نضغط أعلى منه."],
+["ΔP","Pressure drop","فاقد الضغط (مثلاً داخل الأغشية)."],
+["ΔP_px","PX high-pressure ΔP","فاقد الضغط في الجانب عالي الضغط من الـ PX."],
+["ΔP_boost","Boost pressure","الضغط اللي الـ Turbocharger أو الـ booster بيضيفه."],
+["η","Efficiency","الكفاءة: نسبة الشغل المفيد (مثلاً 0.82 = 82%)."],
+["r","Recovery","الاسترداد: نسبة الماء العذب من التغذية = Qp ÷ Qf."],
+["Rej","Salt rejection","نسبة الأملاح اللي الغشاء بيمنعها (مثلاً 99.7%)."],
+["Flux","Permeate flux","كمية الماء المنتج لكل متر مربع غشاء في الساعة."],
+["LMH","Liters per m² per hour","لتر لكل م² في الساعة: وحدة الـ flux."],
+["Qp","Permeate flow","تدفق الماء المنتج (م³/س)."],
+["Qf","Feed flow","تدفق التغذية الداخل للأغشية (م³/س) = Qp ÷ r."],
+["Qc","Concentrate flow","تدفق الـ brine الخارج (م³/س) = Qf − Qp."],
+["Qh","HPP flow","تدفق مضخة الـ HPP. مع الـ PX = Qp + Lube flow."],
+["Qho","PX HP-out flow","التدفق الخارج عالي الضغط من الـ PX للـ booster."],
+["Pf","Feed pressure","ضغط التغذية عند مدخل الأغشية (bar)."],
+["Pc","Brine pressure","ضغط الـ brine عند مخرج الأغشية = Pf − ΔP."],
+["P_perm","Permeate back pressure","الضغط على جانب المياه المنتجة."],
+["Pd","Brine discharge pressure","الضغط بعد الـ ERD عند التصريف، حوالي 1 bar."],
+["Cf","Feed TDS","ملوحة التغذية الداخلة للأغشية."],
+["Csw","Seawater TDS","ملوحة مياه البحر الأصلية."],
+["Cc","Brine TDS","ملوحة الـ brine الخارج."],
+["Cp","Permeate TDS","ملوحة المياه المنتجة."],
+["Lube flow","PX lubrication/leakage flow","جزء صغير (1–3%) من تدفق الـ brine بيتسرب أو يزيّت الـ rotor."],
+["Mixing","PX mixing","اختلاط بسيط جداً بين الـ brine ومياه البحر جوه الـ PX بيرفع ملوحة التغذية."],
+["Q·P efficiency","PX efficiency","كفاءة الـ PX = (تدفق × ضغط الخارج) ÷ (تدفق × ضغط الداخل)."],
+["Aux","Auxiliary energy","طاقة المأخذ والمعالجة الأولية واللاحقة (خارج وحدة الـ RO)."],
+["Availability","Plant availability","نسبة ساعات التشغيل في السنة."],
+["kW","Kilowatt","وحدة القدرة."],
+["kWh/m³","Kilowatt-hour per m³","وحدة الـ SEC."],
+["MWh/y","Megawatt-hour per year","الطاقة السنوية."],
+["EGP","Egyptian Pound","الجنيه المصري."],
+["m³/h","Cubic meter per hour","متر مكعب في الساعة."],
+["ft²","Square feet","قدم مربع. العنصر 400 ft² تساوي 37.2 م²."],
+["bar","Pressure unit","وحدة ضغط. 1 bar تقريباً 14.5 psi."],
+["mg/L","Milligram per liter","وحدة الملوحة (جزء في المليون تقريباً)."],
+["ROSA / WAVE / IMSDesign","Design software","برامج تصميم من الشركات المصنعة للأغشية لمراجعة الأرقام النهائية."]
+];
+$("p5").innerHTML=`<div class="gbox"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px"><h2 style="font-size:16px;color:var(--am)">Glossary</h2><button class="btn" style="width:auto" onclick="gc()">Close ✕</button></div><div class="tabs" style="margin-bottom:10px"><button class="tab on" id="gt0" onclick="gtab(0)"><b>System Guide</b><small>Full cycle explained</small></button><button class="tab" id="gt1" onclick="gtab(1)"><b>Abbreviations</b><small>Searchable</small></button></div><div id="gg" dir="rtl"></div><div id="ga" class="hide"><div class="fld"><input id="gq" type="text" placeholder="Search..." style="text-align:left"></div><div id="gl"></div></div></div>`;
+function go5(){$("p5").classList.add("on");document.body.style.overflow="hidden";$("gq").value="";drawGl();gtab(0)}
+function gc(){$("p5").classList.remove("on");if($("px"))$("px").classList.remove("on");document.body.style.overflow=""}
+$("p5").addEventListener("click",e=>{if(e.target===$("p5"))gc()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")gc()});
+function enw(h){return h.split(/(<[^>]+>)/).map((t,i)=>i%2?t:t.replace(/\([A-Za-z0-9µπΔη][^()\u0600-\u06FF]*\)|[A-Za-z0-9µπΔη][A-Za-z0-9µπΔη_\-\/.+%·×=²³₂₃,:^−– ]*[A-Za-z0-9µπΔη%²³₂₃]|[A-Za-z0-9µπΔη]/g,x=>`<span class="en">${x}</span>`)).join("")}
+function drawGl(){
+ const q=$("gq").value.toLowerCase();
+ $("gl").innerHTML=GL.filter(g=>g.join(" ").toLowerCase().includes(q)).map(g=>`<div class="gr"><b class="en">${g[0]}</b><div><div class="en" style="font-weight:600">${g[1]}</div><div dir="rtl" style="color:var(--mut);font-size:14px;line-height:1.8">${enw(g[2])}</div></div></div>`).join("")||"<div class='why'>No match</div>";
+}
+$("gq").addEventListener("input",drawGl);
+drawGl();
+
+const GUIDE=[
+["ابدأ من هنا: الفكرة في دقيقة",`<p>محطة تحلية مياه البحر بالتناضح العكسي (RO) بتاخد مياه بحر مالحة وبتضغطها بقوة على غشاء رفيع. الغشاء بيسمح للماء العذب بس بالمرور ويمنع الأملاح.</p><p>الناتج حاجتين: <b>مياه عذبة</b> (اسمها permeate)، و<b>مياه مالحة مركزة</b> (اسمها brine).</p><p><b>مثال بالأرقام:</b> عايز 1000 م³ في الساعة ماء عذب، ونسبة الاسترداد 45%. يبقى لازم تدخل الأغشية 2222 م³ في الساعة مياه بحر. الناتج: 1000 عذب و1222 brine. وملوحة الـ brine هتبقى تقريباً ضعف ملوحة البحر (من 38,000 لحوالي 69,000 mg/L).</p><p><b>ليه الضغط عالي؟</b> لأن المياه المالحة بتشد الماء العذب ناحيتها بقوة اسمها الضغط الأسموزي (π)، حوالي 27 bar لمياه البحر. فلازم ندفع بضغط أعلى منه: من 55 إلى 65 bar.</p><p><b>ليه الـ ERD؟</b> الـ brine بيخرج وضغطه لسه من 55 إلى 60 bar. لو اتصرف ضاعت طاقة كبيرة، فبنستخدم جهاز استرجاع الطاقة (ERD) يرجّع الضغط ده للتغذية.</p>`],
+["رموز المعادلات (اقرأها أول)",`<ul><li><b>Qp:</b> تدفق الماء العذب المنتج</li><li><b>Qf:</b> تدفق التغذية الداخلة للأغشية</li><li><b>Qc:</b> تدفق الـ brine الخارج</li><li><b>Pf:</b> ضغط التغذية عند الأغشية</li><li><b>Pc:</b> ضغط الـ brine الخارج</li><li><b>r:</b> الاسترداد (الماء العذب ÷ التغذية)</li><li><b>π:</b> الضغط الأسموزي</li><li><b>ΔP:</b> فاقد الضغط</li><li><b>η:</b> الكفاءة</li></ul><p>باقي الاختصارات كلها في تبويب Abbreviations جنبه.</p>`],
+["1. المأخذ (Intake)",`<p>المكان اللي بنسحب منه مياه البحر. فيه نوعين:</p><ul><li><b>مأخذ مفتوح (Open intake):</b> ماسورة سحب في البحر مع شبك (screens) ومضخات. إنتاجه كبير، لكن المياه فيها عكارة وطحالب فتحتاج تنقية أقوى.</li><li><b>بئر ساحلي (Beach well):</b> بئر جنب البحر والرمل بيصفّي المياه طبيعياً. المياه أنظف، الكيماويات أقل، ومبيأذيش الكائنات البحرية. عيبه: الإنتاج محدود بطبيعة الأرض، وممكن يظهر فيه حديد ومنجنيز (Fe وMn) وغاز كبريتيد الهيدروجين (H₂S).</li></ul>`],
+["2. المعالجة الأولية (Pretreatment)",`<p>الهدف: تنظيف المياه قبل الأغشية لحمايتها. المقياس اللي بنعتمد عليه هو SDI (مؤشر الانسداد) ولازم يكون أقل من 3.</p><ul><li><b>الكلورة:</b> إضافة كلور لمنع نمو الكائنات الحية في خطوط السحب.</li><li><b>SBS (بيسلفيت الصوديوم):</b> بيشيل الكلور بعد كده، لأن الكلور بيتلف الأغشية.</li><li><b>Coagulation وFlocculation:</b> إضافة مادة (زي FeCl₃) بتخلي الشوائب الصغيرة تتجمع وتبقى كبيرة.</li><li><b>DAF:</b> تعويم بالهواء بيشيل الطحالب والزيوت.</li><li><b>فلاتر الرمل (Media filters) أو UF:</b> بيشيلوا العكارة. الـ UF أدق.</li><li><b>Antiscalant:</b> مادة بتمنع ترسيب الأملاح على الأغشية.</li><li><b>ضبط pH:</b> بالحمض عند الحاجة.</li></ul>`],
+["3. فلتر الخرطوشة (Cartridge filter)",`<p>فلتر 5 ميكرون، آخر حماية قبل المضخة والأغشية. فاقد الضغط فيه 0.2–0.5 bar وهو نظيف، ولما يوصل حوالي 1 bar بنغيره.</p>`],
+["4. مضخة الضغط العالي (HPP)",`<p>بترفع ضغط المياه لـ 55–70 bar. كفاءتها 80–88% (يعني جزء بسيط من الكهرباء بيضيع حرارة). وغالباً بنتحكم في سرعتها بمحول تردد (VFD). هي أكبر مستهلك للكهرباء في المحطة.</p>`],
+["5. أجهزة استرجاع الطاقة (ERD)",`<p>الـ brine بيخرج بضغط عالي. الـ ERD بيرجّع الضغط ده للتغذية بدل ما يضيع. فيه 3 أنواع:</p><ul><li><b>PX (مبادل الضغط):</b> بيشتغل بالتوازي مع الـ HPP. جوه الـ PX فيه rotor فيه قنوات: الـ brine بيدخل قناة ويدفع مياه بحر جديدة اتحطت فيها قبل كده، فالمياه دي بتتضغط وتروح للأغشية. الـ brine بعدها يخرج بضغط منخفض للتصريف. كفاءته 95–98%، وبعده مضخة صغيرة اسمها booster تكمل الضغط للأغشية. فيه اختلاط بسيط (1–3%) بين الـ brine ومياه البحر.</li><li><b>Turbocharger:</b> بيتركب بعد الـ HPP وقبل الأغشية. فيه توربين على خط الـ brine ومضخة على نفس العمود. الـ brine بيلف التوربين، والتوربين بيلف المضخة اللي بتزود ضغط التغذية. كفاءته 60–75%، وبيخلي الـ HPP يشتغل بضغط أقل.</li><li><b>Pelton wheel:</b> نفاث الـ brine بيلف عجلة متوصلة بعمود الـ HPP، فبتقلل الشغل اللي الموتور بيعمله. كفاءتها 80–88%.</li></ul><p><b>بدون ERD:</b> الـ brine بيتصرف بضغطه، فالاستهلاك أعلى.</p><p><b>مهم:</b> في الـ Pelton والـ Turbocharger الـ brine مبيدخلش في المياه الداخلة خالص، الطاقة بتتنقل بعمود ميكانيكي.</p>`],
+["6. وحدة الأغشية (RO)",`<ul><li>أغشية قطرها 8 بوصة ملفوفة (spiral-wound) من مادة polyamide.</li><li>بتتركب جوه أنابيب ضغط اسمها vessels من الفايبر (FRP)، وفي كل vessel من 7 إلى 8 عناصر.</li><li><b>Flux:</b> كمية الماء لكل م² غشاء في الساعة. التصميم المعتاد من 13 إلى 16 لتر/م²/س (LMH).</li><li><b>رفض الأملاح (Rej):</b> أكبر من 99.7%.</li><li>فاقد الضغط من 1 إلى 4 bar لكل vessel.</li><li>لازم صافي الضغط الدافع (NDP) عند المخرج يبقى موجب، وإلا الإنتاج يقف في آخر العناصر.</li></ul>`],
+["7. المعالجة اللاحقة (Post-treatment)",`<p>المياه المنتجة تقريباً بدون معادن فهي أكالة للمواسير. فبنعمل:</p><ul><li>إضافة معادن (Remineralization) بالكالسيت وثاني أكسيد الكربون أو الجير.</li><li>ضبط pH ومؤشر LSI عشان المياه متترسبش ومتأكلش.</li><li>تعقيم بالكلور.</li><li>مرحلة تحلية ثانية (second pass) لو البورون محتاج تقليل.</li><li>تخزين.</li></ul>`],
+["8. تصريف الـ brine",`<p>الـ brine بيتصرف للبحر في خط (outfall) آخره فتحات متعددة اسمها diffusers عشان الملوحة تتخفف بسرعة وتقل الأضرار البيئية. أحياناً بنعادل أو نشيل الكلور وكيماويات الغسيل قبل التصريف.</p>`],
+["9. الأنظمة المساعدة",`<ul><li><b>CIP:</b> غسيل كيماوي للأغشية (حمضي أو قلوي) بدون فكها.</li><li><b>Flushing:</b> شطف الأغشية بمياه منتجة عند الإيقاف لمنع الترسيب.</li><li><b>Dosing:</b> حقن الكيماويات (antiscalant وSBS وحمض).</li><li>أجهزة قياس (ضغط وتدفق وتوصيلية) وخزانات.</li></ul>`],
+["10. فروق الضغط في الدورة",`<ul><li><b>ضغط التغذية (Pf):</b> من 55 إلى 65 bar.</li><li><b>الضغط الأسموزي للتغذية (π):</b> حوالي 25–30 bar.</li><li><b>الضغط الأسموزي للـ brine:</b> حوالي 55 bar عند استرداد 45%.</li><li><b>فاقد الضغط داخل الأغشية:</b> من 1 إلى 4 bar، فضغط الـ brine الخارج يساوي Pf ناقص الفاقد.</li><li><b>فلتر الخرطوشة:</b> من 0.2 إلى 1 bar.</li><li><b>فلاتر الرمل:</b> من 0.3 إلى 1 bar.</li><li><b>داخل الـ PX:</b> من 0.5 إلى 1.5 bar، والـ booster بيعوضه.</li></ul><p>صافي الضغط الدافع (NDP):</p><div class="fm">NDP = Pf − ΔP/2 − π_avg − P_perm</div><p>π_avg متوسط الضغط الأسموزي بين التغذية والـ brine، وP_perm الضغط على جانب الماء المنتج.</p>`],
+["11. الموازنة الهيدروليكية (توازن التدفقات)",`<p>تدفق التغذية = المنتج + الـ brine:</p><div class="fm">Qf = Qp + Qc</div><p>الاسترداد (نسبة الماء العذب):</p><div class="fm">r = Qp / Qf</div><p>ملوحة الـ brine (Rej رفض الأملاح):</p><div class="fm">Cc = Cf × (1 − r×(1 − Rej)) / (1 − r)</div><p>مع الـ PX: المضخة تشتغل بتدفق المنتج + جزء التسرب فقط.</p><div class="fm">Q_HPP = Qp + Q_lube</div><div class="fm">Q_HP-out = Qc − Q_lube</div>`],
+["12. حساب الطاقة",`<p>القدرة اللازمة لمضخة (Q بـ م³/س و ΔP بـ bar):</p><div class="fm">kW = Q × ΔP / (36 × η)</div><p>الطاقة النوعية بدون ERD (kWh لكل م³ ماء):</p><div class="fm">SEC = Pf / (36 × η × r)</div><p><b>PX:</b> الـ HPP عند تدفق Q_HPP، والـ booster عند Q_HP-out.</p><p><b>Turbocharger:</b> الضغط المضاف للتغذية:</p><div class="fm">ΔP_boost = η_t × η_p × Qc × (Pc − Pd) / Qf</div><p>والـ HPP يشتغل عند Pf − ΔP_boost.</p><p><b>Pelton:</b> الطاقة المسترجعة:</p><div class="fm">Qc × (Pc − Pd) / 36 × η</div><p>وبتتخصم من شغل الـ HPP.</p><p>الكهرباء الفعلية = شغل العمود ÷ كفاءة الموتور. وSEC المحطة = SEC الـ RO + طاقة المأخذ والمعالجة (Aux).</p>`],
+["13. افتراضات الأداة",`<ul><li>الضغط الأسموزي تقريب بسيط: 0.77 bar لكل g/L ومعدل بالحرارة.</li><li>اختلاط الـ PX بيتحسب بالتكرار لحد ما الأرقام تستقر.</li><li>الأداة لا تحسب: فاقد الأنابيب، اتساخ الأغشية بمرور الوقت، الغسيل الكيماوي، ولا فاقد الضغط في المعالجة الأولية.</li><li>راجع الأرقام النهائية ببرامج الشركات المصنعة (ROSA أو WAVE أو IMSDesign) قبل التنفيذ.</li></ul>`],
+["14. إزاي تستخدم الأداة",`<ul><li><b>Plant Data:</b> اختار المياه والإنتاج والأغشية.</li><li><b>Equipment:</b> اختار الـ ERD والمضخات والتكلفة.</li><li><b>Schematic:</b> رسم تفاعلي. دوس على أي جهاز تشوف قيمه وتعدّل مدخلاته.</li><li><b>Results:</b> الطاقة والتدفقات.</li><li><b>Pressure Map:</b> الضغط في كل نقطة.</li><li><b>ERD Compare:</b> مقارنة الأنواع الأربعة.</li></ul>`]
+].map((g,i)=>`<details class="gd" ${i===0?"open":""}><summary>${enw(g[0])}</summary>${enw(g[1])}</details>`).join("");
+$("gg").innerHTML=GUIDE;
+function gtab(i){$("gg").classList.toggle("hide",i===1);$("ga").classList.toggle("hide",i===0);$("gt0").classList.toggle("on",i===0);$("gt1").classList.toggle("on",i===1)}
+
+const ND={
+intake:["Intake","المأخذ: بحر مفتوح أو بئر ساحلي. بيحدد جودة المياه (SDI، ملوحة، حرارة) وبالتالي قوة المعالجة الأولية."],
+pre:["Pretreatment","كلور/SBS وتخثير وفلاتر وسائط أو UF وantiscalant. الهدف SDI أقل من 3 قبل الأغشية. طاقتها داخلة في Aux."],
+cart:["Cartridge filter 5µm","حماية أخيرة للـ HPP والـ ERD والأغشية من الجسيمات. ΔP نظيف 0.2–0.5 bar ويتغير عند ~1 bar."],
+hpp:["High Pressure Pump (HPP)","يرفع التغذية لضغط الأغشية (55–70 bar). أكبر مستهلك للطاقة في المحطة."],
+boost:["PX booster pump","تكمل ضغط تدفق مخرج الـ PX للوصول لضغط الأغشية، وتعوض ΔP الأغشية والـ PX."],
+mem:["RO membranes","أغشية 8 بوصة داخل vessels. تفصل الماء العذب عن الـ brine. لازم NDP عند المخرج يبقى موجب."],
+post:["Post-treatment & product","إعادة تمعدن، ضبط pH وLSI، تعقيم، وتخزين للمياه المنتجة."],
+disc:["Brine outfall","تصريف الـ brine بعد استرجاع الطاقة، عادة عبر diffusers لتخفيف الملوحة."]
+};
+let selNode="hpp",ekey="",LS=null;
+
+$("pS").innerHTML=`
+<div class="card"><div class="chips"><div style="min-width:200px;flex:1"><div class="h" style="font-size:12px;color:var(--mut);margin-bottom:4px">Energy recovery device</div><select data-bind="erd">${$("erd").innerHTML}</select></div><label><input type="checkbox" id="ly_q" checked>Flow</label><label><input type="checkbox" id="ly_p" checked>Pressure</label><label><input type="checkbox" id="ly_c" checked>TDS</label><label><input type="checkbox" id="ly_a" checked>Animate</label></div></div>
+<div class="card sec" style="margin-top:14px"><div class="wrap"><svg id="sch" viewBox="0 0 1100 470" style="min-width:860px;width:100%;display:block"></svg></div>
+<div class="lg"><span><i style="background:var(--sw)"></i>Seawater</span><span><i style="background:var(--am)"></i>High-pressure feed</span><span><i style="background:var(--brine)"></i>Brine</span><span><i style="background:var(--ok)"></i>Permeate</span><span><i style="background:var(--mut)"></i>Common shaft</span></div></div>
+<div class="card" style="margin-top:14px"><h2 id="iT"></h2><div class="why" id="iD" style="font-size:13px"></div><div class="cards"><div><div class="wrap"><table id="iL"></table></div></div><div id="iEdit"></div></div></div>`+nav(1,3);
+
+function selN(n){selNode=n;render()}
+function bindEv(e){const b=e.target.dataset&&e.target.dataset.bind;if(!b)return;const r=$(b);if(r.value===e.target.value)return;r.value=e.target.value;r.dispatchEvent(new Event("input",{bubbles:true}));if(r.tagName==="SELECT")r.dispatchEvent(new Event("change",{bubbles:true}))}
+$("pS").addEventListener("input",bindEv);
+$("pS").addEventListener("change",bindEv);
+
+const nf=(id,l)=>`<div class="fld"><label>${l}</label><div class="row"><input type="number" step="any" data-bind="${id}" value="${$(id).value}"><span class="u">${$(id+"_u")?$(id+"_u").textContent:""}</span></div></div>`;
+const sf=(id,l)=>`<div class="fld"><label>${l}</label><select data-bind="${id}">${$(id).innerHTML}</select></div>`;
+
+function buildEdit(n,v){
+ const t=v.erd;
+ if(n==="intake")return sf("src","Water source")+nf("tds","Feed TDS")+nf("temp","Temperature")+sf("intake","Intake type");
+ if(n==="pre")return nf("aux","Intake + pre + post energy");
+ if(n==="cart")return `<div class="why">Fixed filter, no parameters.</div>`;
+ if(n==="hpp")return sf("pump","Pump quality")+nf("eh","HPP efficiency")+nf("em","Motor efficiency");
+ if(n==="boost")return nf("eb","Booster efficiency")+nf("em","Motor efficiency");
+ if(n==="erd"){
+  let h=sf("erd","ERD type");
+  if(t==="px")h+=nf("lube","Lube / leakage flow")+nf("mix","Mixing")+nf("dpx","PX HP-side ΔP")+nf("eb","Booster efficiency");
+  if(t==="turbo")h+=nf("et","Turbine efficiency")+nf("etp","Turbo pump efficiency")+nf("pd","Brine discharge pressure");
+  if(t==="pelton")h+=nf("epl","Pelton efficiency")+nf("pd","Brine discharge pressure");
+  return h;
+ }
+ if(n==="mem")return sf("elem","Element size")+sf("vmode","Vessels")+(v.vmode==="auto"?nf("flux","Design flux"):nf("nv","Pressure vessels"))+nf("ne","Elements per vessel")+nf("rec","Recovery")+nf("rej","Salt rejection")+nf("pf","Feed pressure")+nf("dpm","Membrane ΔP")+nf("pperm","Permeate back pressure")+`<button class="btn" onclick="autoPf()">Auto-set feed pressure</button>`;
+ if(n==="post")return sf("unit","Capacity unit")+nf("cap","Permeate capacity")+nf("tar","Electricity tariff")+nf("av","Availability");
+ if(n==="disc")return nf("pd","Brine discharge pressure");
+ return "";
+}
+
+function liveRows(n){
+ const {v,s}=LS,t=v.erd;
+ const flux=v.qp*1000/(v.nvu*v.ne*v.ae);
+ const R={
+ intake:[["Intake flow",s.Qf,"m³/h",0],["Feed TDS",v.tds,"mg/L",0],["Temperature",v.temp,"°C",1]],
+ pre:[["Flow",s.Qf,"m³/h",0],["Aux power",v.aux*v.qp,"kW",0],["Aux SEC",v.aux,"kWh/m³",2]],
+ cart:[["Flow",s.Qf,"m³/h",0],["Typical ΔP","0.2–1.0","bar"]],
+ hpp:[["HPP flow",t==="px"?s.Qh:s.Qf,"m³/h",0],["Discharge pressure",t==="turbo"?s.Phpp:s.Pf,"bar",1],["Electric power",s.hppE,"kW",0],["SEC share",s.hppE/v.qp,"kWh/m³",2]],
+ boost:[["Flow",s.Qho,"m³/h",0],["Booster ΔP",s.dPb,"bar",1],["Electric power",s.boE,"kW",0]],
+ mem:[["Feed Qf",s.Qf,"m³/h",0],["Permeate Qp",s.Qp,"m³/h",0],["Brine Qc",s.Qc,"m³/h",0],["Feed pressure",s.Pf,"bar",1],["Brine pressure",s.Pc,"bar",1],["NDP at outlet",s.ndpo,"bar",1],["Average flux",flux,"LMH",1],["Vessels",v.nvu,"",0],["Permeate TDS",s.Cp,"mg/L",0]],
+ post:[["Product flow",s.Qp,"m³/h",0],["Product TDS",s.Cp,"mg/L",0],["Plant SEC",s.secT,"kWh/m³",2],["Energy cost",s.secT*v.tar,"EGP/m³",2]],
+ disc:[["Brine flow",s.Qc,"m³/h",0],["Brine TDS",s.Cc,"mg/L",0],["Discharge pressure",v.pd,"bar",1]]
+ };
+ if(t==="none")R.erd=[["Brine pressure wasted",s.Pc,"bar",1],["Wasted hydraulic power",s.Qc*(s.Pc-v.pd)/36,"kW",0]];
+ if(t==="px")R.erd=[["PX efficiency",s.etaPx,"%",1],["HP-out flow",s.Qho,"m³/h",0],["Lube flow",s.lube,"m³/h",0],["HP-out pressure",s.Ppxo,"bar",1],["Booster ΔP",s.dPb,"bar",1],["Feed TDS rise",s.Cf-v.tds,"mg/L",0]];
+ if(t==="turbo")R.erd=[["Boost ΔP",s.dPb,"bar",1],["Recovered shaft power",s.rec,"kW",0],["HPP discharge",s.Phpp,"bar",1],["Turbine inlet",s.Pc,"bar",1]];
+ if(t==="pelton")R.erd=[["Recovered shaft power",s.rec,"kW",0],["Nozzle inlet pressure",s.Pc,"bar",1],["Net HPP motor power",s.hppE,"kW",0]];
+ return R[n]||[];
+}
+
+function schSVG(){
+ const {v,s}=LS,t=v.erd;
+ const L={p:$("ly_p").checked,q:$("ly_q").checked,c:$("ly_c").checked},an=$("ly_a").checked;
+ const pp=(d,c)=>`<path class="pp ${c}" d="${d}"/><path class="fl ${c} ${an?"":"off"}" d="${d}"/>`;
+ const ln=(q,p,c)=>{const a=[];if(L.q&&q!=null)a.push(f(q,0)+" m³/h");if(L.p&&p!=null)a.push(f(p,1)+" bar");if(L.c&&c!=null)a.push(f(c,0)+" mg/L");return a};
+ const lab=(x,y,a,an2="middle")=>a.map((l,i)=>`<text class="lb" x="${x}" y="${y+i*12}" text-anchor="${an2}">${l}</text>`).join("");
+ const cls=id=>`nd ${selNode===id?"sel":""}`;
+ const rect=(id,x,y,w,h,a,b)=>`<g class="${cls(id)}" onclick="selN('${id}')"><rect class="bx" x="${x}" y="${y}" width="${w}" height="${h}" rx="10"/><text x="${x+w/2}" y="${y+h/2-2}">${a}</text><text class="s2" x="${x+w/2}" y="${y+h/2+14}">${b||""}</text></g>`;
+ const circ=(id,cx,cy,r,a,b)=>`<g class="${cls(id)}" onclick="selN('${id}')"><circle class="bx" cx="${cx}" cy="${cy}" r="${r}"/><text x="${cx}" y="${cy+(b?-2:4)}">${a}</text>${b?`<text class="s2" x="${cx}" y="${cy+12}">${b}</text>`:""}</g>`;
+ const Qh=t==="px"?s.Qh:s.Qf;
+ let o="";
+ o+=pp("M120,150H150","cw")+pp("M260,150H290","cw")+pp("M400,150H440","cw");
+ if(t==="turbo")o+=pp("M500,150H616","ch")+pp("M664,150H740","ch");
+ else o+=pp("M500,150H740","ch");
+ o+=pp("M880,150H960","cp")+pp("M880,178H910V340","cb");
+ if(t==="none"){
+  o+=pp("M910,340H840","cb");
+  o+=rect("disc",720,308,120,64,"Brine outfall","");
+  o+=lab(780,392,ln(s.Qc,v.pd,s.Cc));
+ }
+ if(t==="pelton"){
+  o+=pp("M910,340H836","cb")+pp("M784,340H710","cb");
+  o+=`<path class="sh" d="M810,366V420H470V180"/>`;
+  o+=circ("erd",810,340,26,"Pelton","");
+  o+=rect("disc",590,308,120,64,"Brine outfall","");
+  o+=lab(650,392,ln(s.Qc,v.pd,s.Cc));
+ }
+ if(t==="turbo"){
+  o+=pp("M910,340H836","cb")+pp("M784,340H710","cb");
+  o+=`<path class="sh" d="M810,314V250H640V172"/>`;
+  o+=circ("erd",810,340,26,"Turb","");
+  o+=circ("erd",640,150,24,"Pump","");
+  o+=rect("disc",590,308,120,64,"Brine outfall","");
+  o+=lab(650,392,ln(s.Qc,v.pd,s.Cc));
+ }
+ if(t==="px"){
+  o+=pp("M910,340H800","cb")+pp("M660,340H600","cb");
+  o+=pp("M415,150V420H730V380","cw");
+  o+=pp("M690,300V272","ch")+pp("M690,228V150","ch");
+  o+=rect("erd",660,300,140,80,"Pressure Exchanger","η "+f(s.etaPx,0)+"%");
+  o+=circ("boost",690,250,22,"Boost","");
+  o+=rect("disc",480,308,120,64,"Brine outfall","");
+  o+=lab(525,278,ln(s.Qc,v.pd,s.Cc));
+  o+=lab(572,438,ln(s.Qho,null,null).concat(["LP in"]),"middle");
+  o+=lab(640,262,ln(s.Qho,s.Pf,null),"end");
+ }
+ const isb=$("intake").value==="beach"?"Beach well":$("intake").value==="open"?"Open sea":"Custom";
+ o+=rect("intake",10,118,110,64,"Intake",isb);
+ o+=rect("pre",150,118,110,64,"Pretreatment","SDI &lt; 3");
+ o+=rect("cart",290,118,110,64,"Cartridge","5 µm");
+ o+=circ("hpp",470,150,30,"HPP",f(s.hppE,0)+" kW");
+ o+=rect("mem",740,105,140,90,"RO Membranes",f(v.nvu,0)+" vessels");
+ o+=rect("post",960,118,130,64,"Post-treatment",f(s.Qp,0)+" m³/h");
+ o+=lab(135,84,ln(s.Qf,null,v.tds))+lab(420,84,ln(s.Qf,null,null));
+ o+=lab(t==="turbo"?566:600,84,ln(Qh,t==="turbo"?s.Phpp:s.Pf,null));
+ if(t==="turbo")o+=lab(702,100,ln(s.Qf,s.Pf,null));
+ o+=lab(920,100,ln(s.Qp,v.pperm,s.Cp));
+ o+=lab(926,236,ln(s.Qc,s.Pc,s.Cc),"start");
+ return o;
+}
+
+function schUpdate(){
+ if(!LS)return;
+ const t=LS.v.erd;
+ if(selNode==="boost"&&t!=="px")selNode="erd";
+ $("sch").innerHTML=schSVG();
+ const n=selNode;
+ $("iT").textContent=n==="erd"?NAMES[t]:ND[n][0];
+ $("iD").innerHTML=n==="erd"?DESC[t]:ND[n][1];
+ $("iL").innerHTML=liveRows(n).map(r=>`<tr><td>${r[0]}</td><td>${typeof r[1]==="number"?f(r[1],r[3]):r[1]}</td><td>${r[2]||""}</td></tr>`).join("");
+ const k=[n,t,LS.v.vmode,LS.v.unit].join("|");
+ if(k!==ekey){ekey=k;$("iEdit").innerHTML=buildEdit(n,LS.v)}
+ document.querySelectorAll("#pS [data-bind]").forEach(e=>{const r=$(e.dataset.bind);if(r&&document.activeElement!==e&&e.value!==r.value)e.value=r.value});
+}
+function render(){render0();schUpdate()}
+
+function RD(){
+ const {v,s,all}=LS,t=v.erd,n=all.none;
+ const txt=id=>$(id).selectedOptions[0].text;
+ const flux=v.qp*1000/(v.nvu*v.ne*v.ae),area=v.nvu*v.ne*v.ae;
+ const plantKW=s.secT*v.qp,mwh=plantKW*8760*v.av/100/1000,cost=mwh*1000*v.tar;
+ const d={};
+ d.info={prj:$("xp").value||"—",cli:$("xc").value||"—",by:$("xb").value||"Eng. Hesham Mohamed",date:new Date().toISOString().slice(0,10),sys:NAMES[t]};
+ d.kpi=[["SEC – RO section",s.secRO,"kWh/m³",2],["SEC – total plant",s.secT,"kWh/m³",2],["RO power",s.tot,"kW",0],["Saving vs no ERD",(1-s.tot/n.tot)*100,"%",1],["Annual energy",mwh,"MWh/y",0],["Energy cost",cost/1e6,"M EGP/y",2],["Average flux",flux,"LMH",1],["Permeate TDS",s.Cp,"mg/L",0]];
+ d.inputs=[
+  ["Feed water","Water source",txt("src")],["Feed water","Feed TDS",v.tds,"mg/L",0],["Feed water","Temperature",v.temp,"°C",1],["Feed water","Intake type",txt("intake")],
+  ["Plant","Permeate capacity",v.qp,"m³/h",0],["Plant","Permeate capacity",v.qp*24,"m³/day",0],["Plant","Recovery",v.rec,"%",1],["Plant","Salt rejection",v.rej,"%",2],["Plant","Aux energy",v.aux,"kWh/m³",2],
+  ["Membranes","Element size",txt("elem")],["Membranes","Elements per vessel",v.ne,"",0],["Membranes","Pressure vessels",v.nvu,"",0],["Membranes","Total elements",v.nvu*v.ne,"",0],["Membranes","Active area",area,"m²",0],["Membranes","Feed pressure",v.pf,"bar",1],["Membranes","Membrane ΔP",v.dpm,"bar",1],["Membranes","Permeate back pressure",v.pperm,"bar",1],
+  ["ERD","Type",NAMES[t]]
+ ];
+ if(t==="px")d.inputs.push(["ERD","Lube / leakage flow",v.lube,"% of brine",1],["ERD","Mixing",v.mix,"%",1],["ERD","PX HP-side ΔP",v.dpx,"bar",1],["Pumps","Booster efficiency",v.eb,"%",1]);
+ if(t==="turbo")d.inputs.push(["ERD","Turbine efficiency",v.et,"%",1],["ERD","Turbo pump efficiency",v.etp,"%",1],["ERD","Brine discharge pressure",v.pd,"bar",1]);
+ if(t==="pelton")d.inputs.push(["ERD","Pelton efficiency",v.epl,"%",1],["ERD","Brine discharge pressure",v.pd,"bar",1]);
+ d.inputs.push(["Pumps","HPP efficiency",v.eh,"%",1],["Pumps","Motor efficiency",v.em,"%",1],["Economics","Electricity tariff",v.tar,"EGP/kWh",2],["Economics","Availability",v.av,"%",1]);
+ const Qh=t==="px"?s.Qh:s.Qf;
+ d.equip=[
+  ["1","Intake",txt("intake"),`Q = ${f(s.Qf,0)} m³/h · TDS ${f(v.tds,0)} mg/L · ${f(v.temp,1)} °C`],
+  ["2","Pretreatment","Chlorination/SBS, coagulation, media filters or UF, antiscalant",`Q = ${f(s.Qf,0)} m³/h · Aux ${f(v.aux)} kWh/m³ (${f(v.aux*v.qp,0)} kW)`],
+  ["3","Cartridge filter","5 µm protection filter",`Q = ${f(s.Qf,0)} m³/h`],
+  ["4","High Pressure Pump (HPP)","Multistage centrifugal / plunger",`Q = ${f(Qh,0)} m³/h · P = ${f(t==="turbo"?s.Phpp:s.Pf,1)} bar · input ${f(s.hppE,0)} kW · η ${f(v.eh,1)}%`]
+ ];
+ if(t==="px")d.equip.push(["5","Pressure Exchanger (PX)","Isobaric rotary energy recovery",`η ${f(s.etaPx,1)}% · HP-out ${f(s.Qho,0)} m³/h at ${f(s.Ppxo,1)} bar · lube ${f(s.lube,1)} m³/h · mixing ${f(v.mix,1)}%`],["6","PX booster pump","Circulation booster",`Q = ${f(s.Qho,0)} m³/h · ΔP = ${f(s.dPb,1)} bar · input ${f(s.boE,0)} kW`]);
+ if(t==="turbo")d.equip.push(["5","Turbocharger","Brine turbine + feed pump on common shaft",`ΔP boost ${f(s.dPb,1)} bar · recovered ${f(s.rec,0)} kW · η turbine ${f(v.et,1)}% / pump ${f(v.etp,1)}%`]);
+ if(t==="pelton")d.equip.push(["5","Pelton wheel","Brine turbine on HPP motor shaft",`Recovered ${f(s.rec,0)} kW · η ${f(v.epl,1)}% · inlet ${f(s.Pc,1)} bar`]);
+ if(t==="none")d.equip.push(["5","No ERD","Brine let down without recovery",`Wasted ${f(s.Qc*(s.Pc-v.pd)/36,0)} kW hydraulic`]);
+ d.equip.push(
+  ["7","RO membrane skid",`${txt("elem")} elements`,`${f(v.nvu,0)} vessels × ${v.ne} = ${f(v.nvu*v.ne,0)} elements · ${f(area,0)} m² · flux ${f(flux,1)} LMH · Pf ${f(s.Pf,1)} / Pc ${f(s.Pc,1)} bar`],
+  ["8","Post-treatment","Remineralization, pH/LSI adjustment, disinfection",`Product ${f(s.Qp,0)} m³/h · TDS ${f(s.Cp,0)} mg/L`],
+  ["9","Brine outfall","Diffuser outfall",`Q = ${f(s.Qc,0)} m³/h · TDS ${f(s.Cc,0)} mg/L · ${f(v.pd,1)} bar`]
+ );
+ d.flows=[["Permeate Qp",s.Qp,"m³/h",0],["Membrane feed Qf",s.Qf,"m³/h",0],["Brine Qc",s.Qc,"m³/h",0],["HPP flow",Qh,"m³/h",0]];
+ if(t==="px")d.flows.push(["PX lube flow",s.lube,"m³/h",1],["PX HP-out / booster flow",s.Qho,"m³/h",0],["PX efficiency (Q·P)",s.etaPx,"%",1]);
+ d.flows.push(["Seawater TDS",v.tds,"mg/L",0],["RO feed TDS",s.Cf,"mg/L",0],["Brine TDS",s.Cc,"mg/L",0],["Permeate TDS",s.Cp,"mg/L",0]);
+ d.osm=[["π feed",s.pif,"bar",1],["π brine",s.pic,"bar",1],["π average",s.pia,"bar",1],["NDP average",s.ndp,"bar",1],["NDP at outlet",s.ndpo,"bar",1]];
+ const p=[];
+ if(t==="none")p.push(["HPP discharge",s.Pf]);
+ if(t==="px")p.push(["HPP discharge",s.Pf],["PX HP inlet (brine)",s.Pc],["PX HP outlet",s.Ppxo],["Booster discharge",s.Pf]);
+ if(t==="turbo")p.push(["HPP discharge",s.Phpp],["Turbocharger discharge",s.Pf],["Turbine inlet (brine)",s.Pc],["Turbine outlet",v.pd]);
+ if(t==="pelton")p.push(["HPP discharge",s.Pf],["Pelton inlet (brine)",s.Pc],["Pelton outlet",v.pd]);
+ p.push(["Membrane feed inlet",s.Pf],["Membrane brine outlet",s.Pc],["Permeate",v.pperm]);
+ d.press=p;
+ d.power=[["HPP",s.hppE]];
+ if(t==="px")d.power.push(["PX booster",s.boE]);
+ d.power.push(["Intake + pre/post",v.aux*v.qp]);
+ d.rec=(t==="turbo"||t==="pelton")?s.rec:0;
+ d.total=plantKW;
+ d.cmp=["none","px","turbo","pelton"].map(k=>{const a=all[k];return [NAMES[k],a.hppE,a.boE,a.tot,a.secRO,a.secT,(1-a.tot/n.tot)*100,a.secT*v.qp*8760*v.av/100*v.tar/1e6,k===t]});
+ d.alerts=[];
+ if(s.ndpo<0.5)d.alerts.push([false,`Outlet NDP is ${f(s.ndpo)} bar — increase feed pressure or reduce recovery.`]);
+ if(flux>17)d.alerts.push([false,`Average flux ${f(flux,1)} LMH exceeds ~17 LMH.`]);
+ if(s.Cc>75000)d.alerts.push([false,`Brine TDS ${f(s.Cc,0)} mg/L is very high — check scaling limits.`]);
+ if(!d.alerts.length)d.alerts.push([true,"Operating point is within typical SWRO limits."]);
+ return d;
+}
+
+function stdSVG(){
+ const {v,s}=LS,t=v.erd;
+ const c=$("sch").cloneNode(true);
+ const col={cw:"#2b8fb5",ch:"#e08a00",cb:"#8b5a2b",cp:"#2f9e6b"};
+ const ff="Arial,Helvetica,sans-serif";
+ c.querySelectorAll(".fl").forEach(e=>e.remove());
+ c.querySelectorAll(".pp").forEach(e=>{const k=["cw","ch","cb","cp"].find(x=>e.classList.contains(x));["stroke:"+col[k],"stroke-width:7","stroke-opacity:.55","fill:none","stroke-linecap:round"].forEach(x=>{const q=x.split(":");e.setAttribute(q[0],q[1])});e.removeAttribute("class")});
+ c.querySelectorAll(".sh").forEach(e=>{e.setAttribute("stroke","#5b6b8c");e.setAttribute("stroke-width","2");e.setAttribute("stroke-dasharray","6 5");e.setAttribute("fill","none");e.removeAttribute("class")});
+ c.querySelectorAll(".nd").forEach(g=>{
+  const b=g.querySelector(".bx");b.setAttribute("fill","#e6f4fb");b.setAttribute("stroke","#0b6e99");b.setAttribute("stroke-width","2");b.removeAttribute("class");
+  g.querySelectorAll("text").forEach(x=>{const s2=x.classList.contains("s2");x.setAttribute("fill",s2?"#5b6b8c":"#0b6e99");x.setAttribute("font-size",s2?"11":"13");x.setAttribute("font-weight",s2?"400":"700");x.setAttribute("text-anchor","middle");x.setAttribute("font-family",ff);x.removeAttribute("class")});
+  g.removeAttribute("class");g.removeAttribute("onclick");
+ });
+ c.querySelectorAll("text.lb").forEach(x=>{x.removeAttribute("class");x.setAttribute("font-size","11");x.setAttribute("font-family",ff);const h=x.cloneNode(true);h.setAttribute("fill","#ffffff");h.setAttribute("stroke","#ffffff");h.setAttribute("stroke-width","4");h.setAttribute("stroke-linejoin","round");x.setAttribute("fill","#1b2b4a");x.parentNode.insertBefore(h,x)});
+ const lg=[["Seawater",col.cw],["High-pressure feed",col.ch],["Brine",col.cb],["Permeate",col.cp]];
+ let L="";lg.forEach((x,i)=>{L+=`<line x1="${20+i*190}" y1="464" x2="${50+i*190}" y2="464" stroke="${x[1]}" stroke-width="6" stroke-linecap="round"/><text x="${58+i*190}" y="468" font-size="12" fill="#5b6b8c" font-family="${ff}">${x[0]}</text>`});
+ L+=`<line x1="780" y1="464" x2="810" y2="464" stroke="#5b6b8c" stroke-width="2" stroke-dasharray="6 5"/><text x="818" y="468" font-size="12" fill="#5b6b8c" font-family="${ff}">Common shaft</text>`;
+ const ttl=`<text x="12" y="52" font-size="15" font-weight="700" fill="#0b6e99" font-family="${ff}">${NAMES[t]} · ${f(v.qp,0)} m³/h · recovery ${f(v.rec,1)}% · SEC ${f(s.secT)} kWh/m³</text>`;
+ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 28 1100 442" width="1100" height="442"><rect x="0" y="28" width="1100" height="442" fill="#ffffff"/>${ttl}${c.innerHTML}${L}</svg>`;
+}
+
+function svgToPng(svg,k){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>{const cv=document.createElement("canvas");cv.width=1100*k;cv.height=442*k;const x=cv.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,cv.width,cv.height);x.drawImage(im,0,0,cv.width,cv.height);cv.toBlob(b=>res(b),"image/png")};im.onerror=rej;im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)})}
+function dl(b,n){const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+function fname(ext){return `SWRO_${LS.v.erd}_${new Date().toISOString().slice(0,10)}.${ext}`}
+
+function buildReport(){
+ const d=RD(),I=d.info;
+ const cl=["#0b6e99","#f5a623","#2b8fb5","#2f9e6b"];
+ const ks=d.kpi.map((x,i)=>`<div class="rk" style="border-left-color:${cl[i%4]}"><span>${x[0]}</span><b>${f(x[1],x[3])} <small>${x[2]}</small></b></div>`).join("");
+ const row3=r=>`<tr><td>${r[0]}</td><td class="n">${typeof r[1]==="number"?f(r[1],r[3]):r[1]}</td><td>${r[2]||""}</td></tr>`;
+ const pm=Math.max(...d.press.map(x=>x[1]),1);
+ const pt=d.press.map(x=>`<tr><td>${x[0]}</td><td class="n">${f(x[1],1)} bar</td><td style="width:38%"><div class="rb"><i style="width:${x[1]/pm*100}%;background:#f5a623"></i></div></td></tr>`).join("");
+ const pw=Math.max(...d.power.map(x=>x[1]),d.rec,1);
+ const pr=d.power.map(x=>`<tr><td>${x[0]}</td><td class="n">${f(x[1],0)} kW</td><td class="n">${f(x[1]/LS.v.qp)} kWh/m³</td><td style="width:34%"><div class="rb"><i style="width:${x[1]/pw*100}%;background:#0b6e99"></i></div></td></tr>`).join("")+(d.rec?`<tr><td>Energy recovered (shaft)</td><td class="n">${f(d.rec,0)} kW</td><td class="n">${f(d.rec/LS.v.qp)} kWh/m³</td><td><div class="rb"><i style="width:${d.rec/pw*100}%;background:#2f9e6b"></i></div></td></tr>`:"")+`<tr class="sel"><td>Total plant</td><td class="n">${f(d.total,0)} kW</td><td class="n">${f(LS.s.secT)} kWh/m³</td><td></td></tr>`;
+ const cm=Math.max(...d.cmp.map(x=>x[4]));
+ const ct=d.cmp.map(x=>`<tr class="${x[8]?"sel":""}"><td>${x[0]}</td><td class="n">${f(x[1],0)}</td><td class="n">${f(x[2],0)}</td><td class="n">${f(x[3],0)}</td><td class="n">${f(x[4])}</td><td class="n">${f(x[5])}</td><td class="n">${f(x[6],1)}%</td><td class="n">${f(x[7])}</td><td style="width:18%"><div class="rb"><i style="width:${x[4]/cm*100}%;background:${x[8]?"#f5a623":"#2b8fb5"}"></i></div></td></tr>`).join("");
+ const eq=d.equip.map(x=>`<tr><td>${x[0]}</td><td><b>${x[1]}</b></td><td>${x[2]}</td><td>${x[3]}</td></tr>`).join("");
+ const inp=d.inputs.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td class="n">${typeof x[2]==="number"?f(x[2],x[4]):x[2]}</td><td>${x[3]||""}</td></tr>`).join("");
+ const al=d.alerts.map(a=>`<div class="al ${a[0]?"ok":"no"}">${a[1]}</div>`).join("");
+ const T=(t,n,h,b,c)=>`<table class="${c}"><thead><tr class="tt"><th colspan="${n}">${t}</th></tr><tr>${h}</tr></thead><tbody>${b}</tbody></table>`;
+ const h3='<th>Item</th><th class="n">Value</th><th>Unit</th>';
+ return `<div class="tb"><button onclick="window.print()">Print / Save as PDF</button><button class="g" onclick="rclose()">Close</button></div><div class="pg">
+<div class="hd"><div><h1>SWRO Hydraulic &amp; Energy Calculation Report</h1><div style="font-size:11px;opacity:.85;margin-top:3px">${d.info.sys} · ${f(LS.v.qp,0)} m³/h permeate</div></div></div>
+<div class="in"><div><small>Project</small><b>${I.prj}</b></div><div><small>Client</small><b>${I.cli}</b></div><div><small>Date</small><b>${I.date}</b></div><div><small>Prepared by</small><b>${I.by}</b></div></div>
+<div class="bd">
+<div class="sc">${al}<h2>Key results</h2><div class="ks">${ks}</div></div>
+<div class="sc"><h2>Process schematic</h2><div class="sv">${stdSVG()}</div></div>
+${T("Equipment schedule",4,'<th>#</th><th>Equipment</th><th>Type / description</th><th>Duty / key data</th>',eq,"tv")}
+${T("Design data",4,'<th>Group</th><th>Parameter</th><th class="n">Value</th><th>Unit</th>',inp,"tv")}
+<div class="g2">${T("Flows &amp; salinity",3,h3,d.flows.map(row3).join(""),"ts")}${T("Osmotic &amp; driving pressure",3,h3,d.osm.map(row3).join(""),"ts")}</div>
+${T("Pressure profile",3,'<th>Point</th><th class="n">Pressure</th><th></th>',pt,"ts")}
+${T("Power breakdown",4,'<th>Item</th><th class="n">Power</th><th class="n">SEC</th><th></th>',pr,"ts")}
+${T("ERD comparison (same operating point)",9,'<th>ERD</th><th class="n">HPP kW</th><th class="n">Boost kW</th><th class="n">Total kW</th><th class="n">SEC RO</th><th class="n">SEC plant</th><th class="n">Saving</th><th class="n">EGP M/y</th><th></th>',ct,"ts")}
+<div style="margin-top:10px;font-size:10px;color:#5b6b8c">Preliminary calculation. Osmotic pressure uses a linear approximation (0.77 bar per g/L, temperature-corrected). Pipe losses, membrane fouling, CIP and pretreatment pressure drops are not included. Verify final design with ROSA / WAVE / IMSDesign.</div></div>
+<div class="ft"><span><b>Eng. Hesham Mohamed</b></span><span>${I.date}</span></div></div>`;
+}
+function xo(){$("px").classList.add("on");document.body.style.overflow="hidden"}
+function xrep(){gc();$("rep").innerHTML=buildReport();$("rep").classList.add("show");$("rep").scrollTop=0;document.body.style.overflow="hidden"}
+function rclose(){$("rep").classList.remove("show");$("rep").innerHTML="";document.body.style.overflow=""}
+async function xpng(){const b=await svgToPng(stdSVG(),2);dl(b,fname("png").replace(".png","_schematic.png"))}
+
+const esc=x=>String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const cl2=i=>String.fromCharCode(65+i);
+let SSM={a:[],m:new Map()};
+function ssi(t){t=String(t);if(!SSM.m.has(t)){SSM.m.set(t,SSM.a.length);SSM.a.push(t)}return SSM.m.get(t)}
+function sx(rows,o={}){
+ let x=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><dimension ref="A1:${cl2(Math.max(1,...rows.map(r=>(Array.isArray(r)?r:r.c).length))-1)}${Math.max(rows.length,1)}"/><sheetViews><sheetView showGridLines="0" workbookViewId="0"/></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>${(o.w||[]).map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join("")}</cols><sheetData>`;
+ rows.forEach((r,ri)=>{
+  const cs=Array.isArray(r)?r:r.c,h=Array.isArray(r)?0:r.h;
+  x+=`<row r="${ri+1}"${h?` ht="${h}" customHeight="1"`:""}>`;
+  cs.forEach((c,ci)=>{
+   if(c===null||c===undefined)return;
+   const o2=typeof c==="object"&&"v" in c?c:{v:c},st=o2.s||0,ref=cl2(ci)+(ri+1);
+   if(typeof o2.v==="number"&&isFinite(o2.v))x+=`<c r="${ref}" s="${st}"><v>${o2.v}</v></c>`;
+   else if(o2.v===""||o2.v===null)x+=`<c r="${ref}" s="${st}"/>`;
+   else x+=`<c r="${ref}" s="${st}" t="s"><v>${ssi(o2.v)}</v></c>`;
+  });
+  x+="</row>";
+ });
+ x+="</sheetData>";
+ if(o.m&&o.m.length)x+=`<mergeCells count="${o.m.length}">${o.m.map(m=>`<mergeCell ref="${m}"/>`).join("")}</mergeCells>`;
+ x+=`<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.6" header="0.3" footer="0.3"/><pageSetup orientation="landscape" fitToHeight="0"/>`;
+ if(o.dr)x+=`<drawing r:id="rId1"/>`;
+ return x+"</worksheet>";
+}
+const STY=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="3"><numFmt numFmtId="164" formatCode="0.00"/><numFmt numFmtId="165" formatCode="#,##0"/><numFmt numFmtId="166" formatCode="0.0"/></numFmts><fonts count="6"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="16"/><color rgb="FF0B6E99"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FF0B6E99"/><name val="Calibri"/></font><font><i/><sz val="10"/><color rgb="FF5B6B8C"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FF17623F"/><name val="Calibri"/></font></fonts><fills count="8"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF0B6E99"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF5A623"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFEAF0FA"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFDDF3E7"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFBE0DE"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF1D6"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFC9D3E6"/></left><right style="thin"><color rgb="FFC9D3E6"/></right><top style="thin"><color rgb="FFC9D3E6"/></top><bottom style="thin"><color rgb="FFC9D3E6"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="21"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="3" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="166" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="165" fontId="0" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="166" fontId="0" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="164" fontId="0" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="5" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="3" fillId="6" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="3" fillId="7" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="165" fontId="3" fillId="7" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="164" fontId="3" fillId="7" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="166" fontId="3" fillId="7" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+
+const CRT=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRT[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function zipBlob(files,type){
+ const enc=new TextEncoder(),loc=[],cen=[];let off=0;
+ const u16=v=>[v&255,(v>>8)&255],u32=v=>[v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255];
+ files.forEach(f2=>{
+  const nm=enc.encode(f2.n),d=typeof f2.d==="string"?enc.encode(f2.d):f2.d,c=crc32(d);
+  const h=[0x50,0x4b,3,4,20,0,0,0,0,0,0,0,0,0,...u32(c),...u32(d.length),...u32(d.length),...u16(nm.length),0,0];
+  loc.push(new Uint8Array(h),nm,d);
+  cen.push(new Uint8Array([0x50,0x4b,1,2,20,0,20,0,0,0,0,0,0,0,0,0,...u32(c),...u32(d.length),...u32(d.length),...u16(nm.length),0,0,0,0,0,0,0,0,0,0,0,0,...u32(off)]),nm);
+  off+=h.length+nm.length+d.length;
+ });
+ const cs=cen.reduce((a,b)=>a+b.length,0);
+ const end=new Uint8Array([0x50,0x4b,5,6,0,0,0,0,...u16(files.length),...u16(files.length),...u32(cs),...u32(off),0,0]);
+ return new Blob([...loc,...cen,end],{type});
+}
+
+function xlsxBlob(png){
+ SSM={a:[],m:new Map()};
+ const d=RD(),I=d.info,v=LS.v;
+ const nst=(dec,z)=>z?[10,11,12][dec]:[6,7,8][dec];
+ const t3=(i,l,val,u,dec)=>{const z=i%2===1;return [{v:l,s:z?9:4},typeof val==="number"?{v:val,s:nst(dec||0,z)}:{v:val,s:z?13:5},{v:u||"",s:z?13:5}]};
+ const sec=(txt,n)=>{const a=[{v:txt,s:3}];for(let i=1;i<n;i++)a.push({v:"",s:3});return a};
+ const hd=a=>a.map(x=>({v:x,s:2}));
+ const sums=[
+  {c:[{v:"SWRO Hydraulic & Energy Calculation Sheet",s:1}],h:30},
+  [{v:"Project",s:4},{v:I.prj,s:5},{v:"Client",s:4},{v:I.cli,s:5}],
+  [{v:"Date",s:4},{v:I.date,s:5},{v:"Prepared by",s:4},{v:I.by,s:5}],
+  [{v:"Selected system",s:4},{v:I.sys,s:5},{v:"Capacity",s:4},{v:`${f(v.qp,0)} m³/h`,s:5}],
+  [],
+  sec("KEY RESULTS",4),
+  hd(["Parameter","Value","Unit",""])
+ ];
+ d.kpi.forEach((k,i)=>sums.push(t3(i,k[0],k[1],k[2],k[3])));
+ sums.push([],sec("CHECKS",4));
+ d.alerts.forEach(a=>sums.push([{v:a[1],s:a[0]?14:15},{v:"",s:a[0]?14:15},{v:"",s:a[0]?14:15},{v:"",s:a[0]?14:15}]));
+ const nA=d.alerts.length,aStart=sums.length-nA+1;
+ sums.push([],[{v:"Preliminary calculation. Verify final design with ROSA / WAVE / IMSDesign.",s:16}],[{v:"Eng. Hesham Mohamed",s:16}]);
+ const mS=["A1:D1"];for(let i=0;i<nA;i++)mS.push(`A${aStart+i}:D${aStart+i}`);
+ const ins=[hd(["Group","Parameter","Value","Unit"])];
+ d.inputs.forEach((r,i)=>{const z=i%2===1;ins.push([{v:r[0],s:z?9:4},{v:r[1],s:z?9:4},typeof r[2]==="number"?{v:r[2],s:nst(r[4]||0,z)}:{v:r[2],s:z?13:5},{v:r[3]||"",s:z?13:5}])});
+ const hy=[sec("FLOWS & SALINITY",3),hd(["Item","Value","Unit"])];
+ d.flows.forEach((r,i)=>hy.push(t3(i,r[0],r[1],r[2],r[3])));
+ hy.push([],sec("OSMOTIC & DRIVING PRESSURE",3),hd(["Item","Value","Unit"]));
+ d.osm.forEach((r,i)=>hy.push(t3(i,r[0],r[1],r[2],r[3])));
+ hy.push([],sec("PRESSURE PROFILE",3),hd(["Point","Pressure","Unit"]));
+ d.press.forEach((r,i)=>hy.push(t3(i,r[0],r[1],"bar",1)));
+ const pw=[hd(["Item","Power (kW)","SEC (kWh/m³)","Share of total (%)"])];
+ d.power.forEach((r,i)=>{const z=i%2===1;pw.push([{v:r[0],s:z?9:4},{v:r[1],s:nst(0,z)},{v:r[1]/v.qp,s:nst(2,z)},{v:r[1]/d.total*100,s:nst(1,z)}])});
+ if(d.rec)pw.push([{v:"Energy recovered (shaft)",s:4},{v:d.rec,s:6},{v:d.rec/v.qp,s:8},{v:"",s:4}]);
+ pw.push([{v:"Total plant",s:17},{v:d.total,s:18},{v:LS.s.secT,s:19},{v:100,s:20}]);
+ const cp=[hd(["ERD","HPP (kW)","Booster (kW)","Total RO (kW)","SEC RO (kWh/m³)","SEC plant (kWh/m³)","Saving (%)","Cost (M EGP/y)"])];
+ d.cmp.forEach((r,i)=>{const z=i%2===1,sl=r[8];cp.push([{v:r[0],s:sl?17:z?9:4},{v:r[1],s:sl?18:nst(0,z)},{v:r[2],s:sl?18:nst(0,z)},{v:r[3],s:sl?18:nst(0,z)},{v:r[4],s:sl?19:nst(2,z)},{v:r[5],s:sl?19:nst(2,z)},{v:r[6],s:sl?20:nst(1,z)},{v:r[7],s:sl?19:nst(2,z)}])});
+ const eq=[hd(["#","Equipment","Type / description","Duty / key data"])];
+ d.equip.forEach((r,i)=>{const z=i%2===1;eq.push([{v:r[0],s:z?9:4},{v:r[1],s:z?9:4},{v:r[2],s:z?13:5},{v:r[3],s:z?13:5}])});
+ const sc=[{c:[{v:"Process schematic — "+I.sys,s:1}],h:28},[{v:`${f(v.qp,0)} m³/h · recovery ${f(v.rec,1)}% · SEC plant ${f(LS.s.secT)} kWh/m³`,s:16}]];
+ const sheets=[
+  ["Summary",sx(sums,{w:[30,26,16,30],m:mS})],
+  ["Inputs",sx(ins,{w:[16,30,18,14]})],
+  ["Hydraulics",sx(hy,{w:[34,16,12]})],
+  ["Power",sx(pw,{w:[28,16,16,18]})],
+  ["ERD Comparison",sx(cp,{w:[28,14,14,16,18,18,14,16]})],
+  ["Equipment",sx(eq,{w:[6,28,50,90]})]
+ ];
+ if(png)sheets.push(["Schematic",sx(sc,{w:[14],dr:1})]);
+ const files=[];
+ files.push({n:"[Content_Types].xml",d:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>${sheets.map((x,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")}${png?`<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>`:""}</Types>`});
+ files.push({n:"_rels/.rels",d:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`});
+ files.push({n:"xl/workbook.xml",d:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView xWindow="0" yWindow="0" windowWidth="20000" windowHeight="12000" activeTab="0"/></bookViews><sheets>${sheets.map((x,i)=>`<sheet name="${x[0]}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join("")}</sheets></workbook>`});
+ files.push({n:"xl/_rels/workbook.xml.rels",d:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((x,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join("")}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId${sheets.length+2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/></Relationships>`});
+ files.push({n:"xl/styles.xml",d:STY});
+ sheets.forEach((x,i)=>files.push({n:`xl/worksheets/sheet${i+1}.xml`,d:x[1]}));
+ files.push({n:"xl/sharedStrings.xml",d:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${SSM.a.length}" uniqueCount="${SSM.a.length}">${SSM.a.map(t=>`<si><t xml:space="preserve">${esc(t)}</t></si>`).join("")}</sst>`});
+ files.push({n:"docProps/core.xml",d:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>SWRO Calculation Sheet</dc:title><dc:creator>${esc(I.by)}</dc:creator></cp:coreProperties>`});
+ files.push({n:"docProps/app.xml",d:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>Microsoft Excel</Application></Properties>`});
+ if(png){
+  const W=Math.round(1100*9525*0.9),H=Math.round(442*9525*0.9);
+  files.push({n:`xl/worksheets/_rels/sheet${sheets.length}.xml.rels`,d:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/></Relationships>`});
+  files.push({n:"xl/drawings/drawing1.xml",d:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><xdr:oneCellAnchor><xdr:from><xdr:col>0</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>3</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from><xdr:ext cx="${W}" cy="${H}"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Schematic"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${W}" cy="${H}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor></xdr:wsDr>`});
+  files.push({n:"xl/drawings/_rels/drawing1.xml.rels",d:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image1.png"/></Relationships>`});
+  files.push({n:"xl/media/image1.png",d:png});
+ }
+ return zipBlob(files,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+}
+async function xxl(){
+ let png=null;
+ try{const b=await svgToPng(stdSVG(),2);png=new Uint8Array(await b.arrayBuffer())}catch(e){png=null}
+ dl(xlsxBlob(png),fname("xlsx"));
+}
+
+document.body.insertAdjacentHTML("beforeend",`<div class="gmodal" id="px"><div class="gbox"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px"><h2 style="font-size:16px;color:var(--am)">Export</h2><button class="btn" style="width:auto" onclick="gc()">Close ✕</button></div><div class="fld"><label for="xp">Project name</label><input id="xp" class="xin" type="text"></div><div class="fld"><label for="xc">Client</label><input id="xc" class="xin" type="text"></div><div class="fld"><label for="xb">Prepared by</label><input id="xb" class="xin" type="text" value="Eng. Hesham Mohamed"></div><div style="display:grid;gap:10px;margin-top:6px"><button class="btn p" style="width:100%" onclick="xrep()">PDF report — preview &amp; print</button><button class="btn" onclick="xxl()">Excel sheet (.xlsx) with schematic</button><button class="btn" onclick="xpng()">Schematic image (PNG)</button></div></div></div><div id="rep"></div>`);
+$("px").addEventListener("click",e=>{if(e.target===$("px"))gc()});
+
+let cur=0;
+function go(i){
+ cur=i;
+ document.querySelectorAll(".panel").forEach((p,k)=>p.classList.toggle("on",k===i));
+ document.querySelectorAll("#tabs .tab").forEach((t,k)=>t.classList.toggle("on",k===i));
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll("#tabs .tab").forEach(t=>t.onclick=()=>go(+t.dataset.i));
+
+const pi=(C,T)=>0.77*C/1000*(T+273.15)/298.15;
+const f=(x,d=2)=>isFinite(x)?x.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d}):"–";
+const setv=(id,v)=>{$(id).value=v};
+
+function V(){
+ const o={};
+ document.querySelectorAll("input[type=number]").forEach(e=>o[e.id]=parseFloat(e.value)||0);
+ ["erd","unit","vmode","elem"].forEach(k=>o[k]=$(k).value);
+ o.qp=o.unit==="d"?o.cap/24:o.cap;
+ o.ae=PRE.elem[o.elem];
+ o.nvu=o.vmode==="auto"?Math.ceil(o.qp*1000/(o.flux*o.ne*o.ae)):o.nv;
+ return o;
+}
+
+function solve(v,type){
+ const r=v.rec/100,rej=v.rej/100,Qp=v.qp,Qf=Qp/r,Qc=Qf-Qp;
+ const eh=v.eh/100,eb=v.eb/100,em=v.em/100;
+ const lube=type==="px"?v.lube/100*Qc:0;
+ const Qho=type==="px"?Qc-lube:0;
+ const Qh=Qf-Qho;
+ const mix=type==="px"?v.mix/100:0;
+ let Cf=v.tds,Cc=v.tds,Cpx=v.tds;
+ for(let i=0;i<80;i++){
+  Cc=Cf*(1-r*(1-rej))/(1-r);
+  Cpx=v.tds+mix*(Cc-v.tds);
+  Cf=(Qh*v.tds+Qho*Cpx)/Qf;
+ }
+ const Cp=Cf*(1-rej);
+ const Pf=v.pf,Pc=Pf-v.dpm;
+ const pif=pi(Cf,v.temp),pic=pi(Cc,v.temp),pia=(pif+pic)/2;
+ const ndp=Pf-v.dpm/2-pia-v.pperm,ndpo=Pc-pic-v.pperm;
+ let Phpp=Pf,Ppxo=0,dPb=0,hppSh=0,boSh=0,rec=0,etaPx=0,pel=0;
+ if(type==="none")hppSh=Qf*Pf/36/eh;
+ if(type==="px"){
+  Ppxo=Pc-v.dpx;dPb=Math.max(0,Pf-Ppxo);
+  hppSh=Qh*Pf/36/eh;boSh=Qho*dPb/36/eb;
+  etaPx=(Qho*Ppxo)/(Qc*Pc)*100;
+ }
+ if(type==="turbo"){
+  dPb=(v.et/100)*(v.etp/100)*Qc*(Pc-v.pd)/Qf;
+  Phpp=Pf-dPb;hppSh=Qf*Phpp/36/eh;
+  rec=Qc*(Pc-v.pd)/36*(v.et/100);
+ }
+ if(type==="pelton"){
+  rec=Qc*(Pc-v.pd)/36*(v.epl/100);
+  hppSh=Qf*Pf/36/eh;pel=rec;
+ }
+ const hppE=(hppSh-pel)/em,boE=boSh/em,tot=hppE+boE;
+ const secRO=tot/Qp,secT=secRO+v.aux;
+ return {Qp,Qf,Qc,Qh,Qho,lube,Cf,Cc,Cp,Pf,Pc,Phpp,Ppxo,dPb,pif,pic,pia,ndp,ndpo,hppE,boE,tot,secRO,secT,etaPx,rec,pel,type};
+}
+
+function autoPf(){
+ const v=V(),s=solve(v,v.erd);
+ setv("pf",(s.pic+v.pperm+2+v.dpm).toFixed(1));
+ render();
+}
+
+function sync(){
+ const e=$("erd").value,vm=$("vmode").value;
+ document.querySelectorAll("[data-for]").forEach(d=>{
+  const k=d.dataset.for.split(" ");
+  const on=k.includes(e)||k.includes(vm);
+  d.classList.toggle("hide",!on);
+ });
+ $("desc").innerHTML=DESC[e];
+}
+
+function render0(){
+ sync();
+ const v=V(),type=v.erd;
+ const all={};["none","px","turbo","pelton"].forEach(t=>all[t]=solve(v,t));
+ const s=all[type],n=all.none;
+ LS={v,s,all};
+ const plantKW=s.secT*v.qp;
+ const annualMWh=plantKW*8760*v.av/100/1000;
+ const cost=annualMWh*1000*v.tar;
+ const flux=v.qp*1000/(v.nvu*v.ne*v.ae);
+ const sav=(1-s.tot/n.tot)*100;
+
+ const lvl=s.secT<3.2?"g":s.secT<4?"m":"r";
+ $("strip").innerHTML=[
+  ["SEC RO",f(s.secRO),"kWh/m³"],["SEC plant",f(s.secT),"kWh/m³"],["RO power",f(s.tot,0),"kW"],["Saving vs no ERD",f(sav,1),"%"]
+ ].map((k,i)=>`<div class="s ${i<2?lvl:i===3?(sav>0?"g":"n"):"n"}"><small>${k[0]}</small><b>${k[1]}</b> <i>${k[2]}</i></div>`).join("");
+
+ $("kpis").innerHTML=[
+  ["SEC – RO section",f(s.secRO)+" kWh/m³",NAMES[type]],
+  ["SEC – total plant",f(s.secT)+" kWh/m³","aux "+f(v.aux)+" kWh/m³"],
+  ["RO power",f(s.tot,0)+" kW","HPP "+f(s.hppE,0)+" · Boost "+f(s.boE,0)],
+  ["Saving vs no ERD",f(sav,1)+" %",f(n.secRO)+" → "+f(s.secRO)],
+  ["Energy",f(annualMWh,0)+" MWh/y",f(plantKW*24/1000,1)+" MWh/d"],
+  ["Energy cost",f(cost/1e6,2)+" M EGP/y","@ "+f(v.tar)+" EGP/kWh"],
+  ["Vessels / flux",f(v.nvu,0)+" · "+f(flux,1)+" LMH",f(v.nvu*v.ne,0)+" elements"],
+  ["Permeate TDS",f(s.Cp,0)+" mg/L","RO feed "+f(s.Cf,0)]
+ ].map(k=>`<div class="k"><span>${k[0]}</span><b>${k[1]}</b><br><small>${k[2]}</small></div>`).join("");
+
+ const w=[];
+ if(s.ndpo<0.5)w.push(["Outlet NDP is "+f(s.ndpo)+" bar. Increase feed pressure (use Auto-set in Plant Data) or reduce recovery."]);
+ if(flux>17)w.push(["Average flux "+f(flux,1)+" LMH is above the typical SWRO limit (~17 LMH). Add vessels."]);
+ if(s.Cc>75000)w.push(["Brine TDS "+f(s.Cc,0)+" mg/L is very high. Check scaling limits."]);
+ if(type==="px"&&s.dPb<=0)w.push(["Booster ΔP is zero. Check PX pressure inputs."]);
+ $("alerts").innerHTML=w.length?w.map(a=>`<div class="al">${a[0]}</div>`).join(""):`<div class="al g">Operating point is within typical SWRO limits.</div>`;
+
+ const rows=[["Permeate Qp",s.Qp,"m³/h"],["Membrane feed Qf",s.Qf,"m³/h"],["Brine Qc",s.Qc,"m³/h"],["HPP flow",type==="px"?s.Qh:s.Qf,"m³/h"]];
+ if(type==="px")rows.push(["PX lube flow",s.lube,"m³/h"],["PX HP-out / booster flow",s.Qho,"m³/h"]);
+ let h="<tr><th>Item</th><th>Value</th><th>Unit</th></tr>"+rows.map(r=>`<tr><td>${r[0]}</td><td>${f(r[1])}</td><td>${r[2]}</td></tr>`).join("");
+ h+=`<tr><td>Seawater TDS</td><td>${f(v.tds,0)}</td><td>mg/L</td></tr><tr><td>RO feed TDS</td><td>${f(s.Cf,0)}</td><td>mg/L</td></tr><tr><td>Brine TDS</td><td>${f(s.Cc,0)}</td><td>mg/L</td></tr>`;
+ if(type==="px")h+=`<tr><td>PX efficiency (Q·P)</td><td>${f(s.etaPx,1)}</td><td>%</td></tr>`;
+ $("tFlow").innerHTML=h;
+
+ const parts=[["HPP",s.hppE,""]];
+ if(type==="px")parts.push(["PX booster",s.boE,""]);
+ if(type==="turbo"||type==="pelton")parts.push(["Energy recovered (shaft)",s.rec,"o"]);
+ parts.push(["Intake + pre/post",v.aux*v.qp,""]);
+ const mx=Math.max(...parts.map(x=>x[1]));
+ $("bars").innerHTML=parts.map(x=>`<div class="bl"><div><span>${x[0]}</span><b>${f(x[1],0)} kW · ${f(x[1]/v.qp)} kWh/m³</b></div><div class="bar ${x[2]}"><i style="width:${x[1]/mx*100}%"></i></div></div>`).join("");
+
+ const p=[];
+ if(type==="none")p.push(["HPP discharge → membranes",s.Pf]);
+ if(type==="px")p.push(["HPP discharge",s.Pf],["PX HP inlet (brine)",s.Pc],["PX HP outlet",s.Ppxo],["Booster discharge",s.Pf]);
+ if(type==="turbo")p.push(["HPP discharge",s.Phpp],["Turbocharger discharge",s.Pf],["Turbine inlet (brine)",s.Pc],["Turbine outlet",v.pd]);
+ if(type==="pelton")p.push(["HPP discharge",s.Pf],["Pelton inlet (brine)",s.Pc],["Pelton outlet",v.pd]);
+ p.push(["Membrane feed inlet",s.Pf],["Membrane brine outlet",s.Pc],["Permeate",v.pperm]);
+ const pm=Math.max(...p.map(x=>x[1]),1);
+ let ph=p.map(x=>`<div class="bl"><div><span>${x[0]}</span><b>${f(x[1],1)} bar</b></div><div class="bar"><i style="width:${x[1]/pm*100}%"></i></div></div>`).join("");
+ if(type==="px"||type==="turbo")ph+=`<div class="bl"><div><span>Boost ΔP</span><b>${f(s.dPb,1)} bar</b></div><div class="bar o"><i style="width:${s.dPb/pm*100}%"></i></div></div>`;
+ $("pmap").innerHTML=ph;
+
+ $("tOsm").innerHTML=`<tr><th>Item</th><th>bar</th></tr>
+ <tr><td>π feed</td><td>${f(s.pif)}</td></tr>
+ <tr><td>π brine</td><td>${f(s.pic)}</td></tr>
+ <tr><td>π average</td><td>${f(s.pia)}</td></tr>
+ <tr><td>Membrane ΔP</td><td>${f(v.dpm)}</td></tr>
+ <tr><td>NDP average</td><td>${f(s.ndp)}</td></tr>
+ <tr><td>NDP at outlet</td><td>${f(s.ndpo)}</td></tr>`;
+
+ let c="<tr><th>ERD</th><th>HPP kW</th><th>Booster kW</th><th>Total kW</th><th>SEC RO</th><th>SEC plant</th><th>Saving</th><th>EGP M/y</th></tr>";
+ ["none","px","turbo","pelton"].forEach(t=>{
+  const a=all[t],sp=(1-a.tot/n.tot)*100,an=a.secT*v.qp*8760*v.av/100*v.tar/1e6;
+  c+=`<tr class="${t===type?"sel":""}"><td>${NAMES[t]}</td><td>${f(a.hppE,0)}</td><td>${f(a.boE,0)}</td><td>${f(a.tot,0)}</td><td>${f(a.secRO)}</td><td>${f(a.secT)}</td><td>${f(sp,1)}%</td><td>${f(an,2)}</td></tr>`;
+ });
+ $("tCmp").innerHTML=c;
+ const cm=Math.max(...["none","px","turbo","pelton"].map(t=>all[t].secRO));
+ $("cbars").innerHTML=["none","px","turbo","pelton"].map(t=>`<div class="bl"><div><span>${NAMES[t]}</span><b>${f(all[t].secRO)} kWh/m³</b></div><div class="bar ${t===type?"":"o"}"><i style="width:${all[t].secRO/cm*100}%"></i></div></div>`).join("");
+}
+
+function applySrc(){const k=$("src").value;if(PRE.src[k]){setv("tds",PRE.src[k][0]);setv("temp",PRE.src[k][1])}}
+function applyIntake(){const k=$("intake").value;if(PRE.intake[k]!==undefined)setv("aux",PRE.intake[k])}
+function applyPump(){const k=$("pump").value;if(PRE.pump[k]){setv("eh",PRE.pump[k][0]);setv("eb",PRE.pump[k][1]);setv("em",PRE.pump[k][2])}}
+
+$("src").onchange=()=>{applySrc();render()};
+$("intake").onchange=()=>{applyIntake();render()};
+$("pump").onchange=()=>{applyPump();render()};
+["tds","temp"].forEach(i=>$(i).addEventListener("input",()=>{$("src").value="custom"}));
+["aux"].forEach(i=>$(i).addEventListener("input",()=>{$("intake").value="custom"}));
+["eh","eb","em"].forEach(i=>$(i).addEventListener("input",()=>{$("pump").value="custom"}));
+$("unit").onchange=()=>{
+ const d=$("unit").value==="d",c=$("cap");
+ c.value=d?(parseFloat(c.value)||0)*24:(parseFloat(c.value)||0)/24;
+ c.step=d?200:10;$("cap_u").textContent=d?"m³/day":"m³/h";
+ render();
+};
+document.querySelectorAll("input,select").forEach(e=>e.addEventListener("input",render));
+document.querySelectorAll("select").forEach(e=>e.addEventListener("change",render));
+
+function setTheme(){let t=$("theme").value;if(t==="auto")t=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"sea";document.documentElement.dataset.th=t}
+$("theme").onchange=setTheme;
+setTheme();
+applySrc();applyIntake();applyPump();
+go(0);render();
+</script>
+</body>
+</html>
